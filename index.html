@@ -1,955 +1,193 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV ChargeMap - Find Electric Vehicle Charging Stations</title>
-    <meta name="description" content="Find 60,000+ electric vehicle charging stations across the United States. Real-time data from NREL government database with search and filter options.">
-    <meta name="keywords" content="EV charging stations, electric vehicle, charging map, Tesla, ChargePoint, Electrify America">
-    <meta name="author" content="EV ChargeMap">
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="EV ChargeMap - Find Electric Vehicle Charging Stations">
-    <meta property="og:description" content="Discover 60,000+ EV charging stations with real-time data from government sources">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://keen-madeleine-7719a0.netlify.app/og-image.jpg">
-    <meta property="og:url" content="https://keen-madeleine-7719a0.netlify.app/">
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="EV ChargeMap - Find Electric Vehicle Charging Stations">
-    <meta name="twitter:description" content="Discover 60,000+ EV charging stations with real-time data">
-    <meta name="twitter:image" content="https://keen-madeleine-7719a0.netlify.app/og-image.jpg">
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "EV ChargeMap",
-        "description": "Find electric vehicle charging stations across the United States",
-        "url": "https://keen-madeleine-7719a0.netlify.app/",
-        "applicationCategory": "Utility",
-        "operatingSystem": "Web Browser",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        }
-    }
-    </script>
-    
-    <!-- Google Analytics (Ready for your tracking ID) -->
-    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'GA_TRACKING_ID');
-    </script> -->
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        /* Header */
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #667eea;
-            text-decoration: none;
-        }
-        
-        .nav {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-        
-        .nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-        
-        .nav a:hover {
-            color: #667eea;
-        }
-        
-        /* Hero Section */
-        .hero {
-            text-align: center;
-            padding: 4rem 0;
-            color: white;
-        }
-        
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            font-weight: bold;
-        }
-        
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.95;
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .feature-card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Stats Section */
-        .stats {
-            background: white;
-            padding: 3rem 0;
-            margin: 2rem 0;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            text-align: center;
-        }
-        
-        .stat-item {
-            padding: 1rem;
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 0.5rem;
-        }
-        
-        /* Search and Filters */
-        .search-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            margin: 2rem 0;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
-        }
-        
-        .search-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 1rem;
-            align-items: end;
-        }
-        
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .input-group label {
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .input-group input,
-        .input-group select {
-            padding: 0.75rem;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-        
-        .input-group input:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        /* Station Cards */
-        .stations-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            margin: 2rem 0;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
-        }
-        
-        .section-title {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            color: #333;
-            text-align: center;
-        }
-        
-        .station-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .station-card {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .station-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border-color: #667eea;
-        }
-        
-        .station-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-        
-        .station-header h3 {
-            font-size: 1.1rem;
-            color: #333;
-            margin: 0;
-            flex: 1;
-            margin-right: 1rem;
-        }
-        
-        .network-badge {
-            background: #667eea;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        
-        .station-info .address {
-            color: #666;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .station-details {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .detail-item {
-            background: #e9ecef;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .station-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-        }
-        
-        .access-code {
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-        
-        .status {
-            font-weight: 500;
-        }
-        
-        /* Loading and Error States */
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            font-size: 1.1rem;
-            color: #666;
-        }
-        
-        .error-message {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            padding: 2rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .error-message h3 {
-            margin-bottom: 1rem;
-        }
-        
-        .retry-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 1rem;
-            transition: background 0.3s ease;
-        }
-        
-        .retry-btn:hover {
-            background: #5a6fd8;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-            font-size: 1.1rem;
-        }
-        
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .pagination button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s ease;
-        }
-        
-        .pagination button:hover:not(:disabled) {
-            background: #5a6fd8;
-        }
-        
-        .pagination button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        /* Footer */
-        .footer {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 2rem 0;
-            text-align: center;
-            margin-top: 3rem;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .footer-section h3 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-        
-        .footer-section p,
-        .footer-section a {
-            color: #666;
-            text-decoration: none;
-            line-height: 1.8;
-        }
-        
-        .footer-section a:hover {
-            color: #667eea;
-        }
-        
-        .footer-bottom {
-            border-top: 1px solid #e9ecef;
-            padding-top: 1rem;
-            color: #666;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .search-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .station-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .features {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .nav {
-                order: 2;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .features {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="#" class="logo">⚡ EV ChargeMap</a>
-                <nav class="nav">
-                    <a href="#search">Find Stations</a>
-                    <a href="#about">About</a>
-                    <a href="#contact">Contact</a>
-                </nav>
-            </div>
-        </div>
-    </header>
+<!-- ✅ Full updated file with the fixed loadStations() function -->
+<!-- Only relevant sections shown here — use this as your final version or override the current one -->
+<!-- You can keep your current HTML/CSS as-is. Just replace your <script> block at the end of index.html with this: -->
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>Find EV Charging Stations</h1>
-            <p>Discover 60,000+ electric vehicle charging stations across the United States with real-time data from government sources</p>
-            
-            <div class="features">
-                <div class="feature-card">
-                    <h3>🗺️ 60K+ Stations</h3>
-                </div>
-                <div class="feature-card">
-                    <h3>📊 Live Data</h3>
-                </div>
-                <div class="feature-card">
-                    <h3>🔍 Smart Search</h3>
-                </div>
-                <div class="feature-card">
-                    <h3>📱 Mobile Friendly</h3>
-                </div>
-            </div>
-        </div>
-    </section>
+<script>
+    let allStations = [];
+    let filteredStations = [];
+    let currentPage = 1;
+    const stationsPerPage = 20;
 
-    <!-- Stats Section -->
-    <section class="container">
-        <div class="stats">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-number stat-total">0</span>
-                    <div class="stat-label">Charging Stations</div>
-                    <div class="stat-sublabel">Loading...</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number stat-networks">0</span>
-                    <div class="stat-label">Networks</div>
-                    <div class="stat-sublabel">Loading...</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number stat-states">0</span>
-                    <div class="stat-label">States Covered</div>
-                    <div class="stat-sublabel">Loading...</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number stat-fast-chargers">0</span>
-                    <div class="stat-label">DC Fast Chargers</div>
-                    <div class="stat-sublabel">Updated daily</div>
-                </div>
-            </div>
-        </div>
-    </section>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStations();
+    });
 
-    <!-- Search and Filters -->
-    <section class="container" id="search">
-        <div class="search-section">
-            <div class="search-grid">
-                <div class="input-group">
-                    <label for="search-input">Search Stations</label>
-                    <input type="text" id="search-input" placeholder="Enter city, station name, or address...">
-                </div>
-                <div class="input-group">
-                    <label for="state-filter">Filter by State</label>
-                    <select id="state-filter">
-                        <option value="">All States</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="network-filter">Filter by Network</label>
-                    <select id="network-filter">
-                        <option value="">All Networks</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="charger-filter">Filter by Charger Type</label>
-                    <select id="charger-filter">
-                        <option value="">All Types</option>
-                        <option value="level1">Level 1</option>
-                        <option value="level2">Level 2</option>
-                        <option value="dcfast">DC Fast</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </section>
+    async function loadStations() {
+        const stationContainer = document.getElementById('station-container');
+        const statsElements = {
+            total: document.querySelector('.stat-total'),
+            networks: document.querySelector('.stat-networks'),
+            states: document.querySelector('.stat-states'),
+            fastChargers: document.querySelector('.stat-fast-chargers')
+        };
 
-    <!-- Stations Section -->
-    <section class="container">
-        <div class="stations-section">
-            <h2 class="section-title">Electric Vehicle Charging Stations</h2>
-            <div id="station-container" class="station-grid">
-                <div class="loading">Loading charging stations from NREL database...</div>
-            </div>
-        </div>
-    </section>
+        try {
+            console.log('🚀 Fetching stations via Netlify function...');
+            stationContainer.innerHTML = '<div class="loading">Loading charging stations from NREL database...</div>';
 
-    <!-- Footer -->
-    <footer class="footer" id="about">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>About EV ChargeMap</h3>
-                    <p>We provide comprehensive, real-time data on electric vehicle charging stations across the United States, sourced directly from the National Renewable Energy Laboratory (NREL) government database.</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Data Source</h3>
-                    <p>All charging station data is provided by the <a href="https://developer.nrel.gov/docs/transportation/alt-fuel-stations-v1/" target="_blank">NREL Alternative Fuel Stations API</a>, ensuring accuracy and reliability.</p>
-                </div>
-                <div class="footer-section" id="contact">
-                    <h3>Stay Updated</h3>
-                    <p>Our database is updated daily with the latest charging station information, including new installations and status changes.</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 EV ChargeMap. Data provided by NREL. Built for EV drivers, by EV enthusiasts.</p>
-            </div>
-        </div>
-    </footer>
+            const response = await fetch('/.netlify/functions/stations', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-    <script>
-        // Global variables
-        let allStations = [];
-        let filteredStations = [];
-        let currentPage = 1;
-        const stationsPerPage = 20;
+            if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
-        // Load stations when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadStations();
-        });
+            const data = await response.json();
 
-        async function loadStations() {
-            const stationContainer = document.getElementById('station-container');
-            const statsElements = {
-                total: document.querySelector('.stat-total'),
-                networks: document.querySelector('.stat-networks'), 
-                states: document.querySelector('.stat-states'),
-                fastChargers: document.querySelector('.stat-fast-chargers')
-            };
-            
-            try {
-                console.log('Loading stations from Netlify function...');
-                stationContainer.innerHTML = '<div class="loading">Loading charging stations from NREL database...</div>';
-                
-                // Fetch from your Netlify function
-                const response = await fetch('/.netlify/functions/stations', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('Received data:', data);
-                
-                if (!data.success) {
-                    throw new Error(data.error || 'Failed to fetch stations');
-                }
-                
-                allStations = data.stations || [];
-                filteredStations = [...allStations];
-                
-                console.log(`Loaded ${allStations.length} stations successfully`);
-                
-                // Update stats
-                updateStats(allStations, statsElements);
-                
-                // Display stations
-                displayStations();
-                
-                // Set up filters
-                setupFilters();
-                
-            } catch (error) {
-                console.error('Error loading stations:', error);
-                stationContainer.innerHTML = `
-                    <div class="error-message">
-                        <h3>⚠️ Error Loading Stations</h3>
-                        <p>Failed to load charging stations: ${error.message}</p>
-                        <p>Please try refreshing the page. If the problem persists, the NREL API may be temporarily unavailable.</p>
-                        <button onclick="loadStations()" class="retry-btn">Retry</button>
-                    </div>
-                `;
-            }
-        }
+            if (!data.success) throw new Error(data.error || 'Function returned failure');
 
-        function updateStats(stations, statsElements) {
-            // Calculate statistics
-            const totalStations = stations.length;
-            const uniqueNetworks = new Set(stations.map(s => s.ev_network).filter(n => n)).size;
-            const uniqueStates = new Set(stations.map(s => s.state).filter(s => s)).size;
-            const fastChargers = stations.filter(s => 
-                s.ev_dc_fast_num && parseInt(s.ev_dc_fast_num) > 0
-            ).length;
-            
-            // Update DOM with animation
-            animateCounter(statsElements.total, totalStations);
-            animateCounter(statsElements.networks, uniqueNetworks);
-            animateCounter(statsElements.states, uniqueStates);
-            animateCounter(statsElements.fastChargers, fastChargers);
-            
-            // Update sublabels
-            document.querySelector('.stat-total').nextElementSibling.nextElementSibling.textContent = 'Real-time data';
-            document.querySelector('.stat-networks').nextElementSibling.nextElementSibling.textContent = 'Major providers';
-            document.querySelector('.stat-states').nextElementSibling.nextElementSibling.textContent = 'Nationwide coverage';
-        }
+            allStations = data.stations || [];
+            filteredStations = [...allStations];
 
-        function animateCounter(element, targetValue) {
-            if (!element) return;
-            
-            let currentValue = 0;
-            const increment = Math.ceil(targetValue / 50);
-            const timer = setInterval(() => {
-                currentValue += increment;
-                if (currentValue >= targetValue) {
-                    currentValue = targetValue;
-                    clearInterval(timer);
-                }
-                element.textContent = currentValue.toLocaleString();
-            }, 30);
-        }
+            console.log(`✅ Loaded ${allStations.length} stations from Netlify function`);
 
-        function displayStations() {
-            const stationContainer = document.getElementById('station-container');
-            const startIndex = (currentPage - 1) * stationsPerPage;
-            const endIndex = startIndex + stationsPerPage;
-            const stationsToShow = filteredStations.slice(startIndex, endIndex);
-            
-            if (stationsToShow.length === 0) {
-                stationContainer.innerHTML = '<div class="no-results">No charging stations found matching your criteria.</div>';
-                return;
-            }
-            
-            const stationsHTML = stationsToShow.map(station => `
-                <div class="station-card">
-                    <div class="station-header">
-                        <h3>${station.station_name || 'Unknown Station'}</h3>
-                        <div class="network-badge">${station.ev_network || 'Independent'}</div>
-                    </div>
-                    <div class="station-info">
-                        <p class="address">📍 ${station.street_address}, ${station.city}, ${station.state} ${station.zip}</p>
-                        <div class="station-details">
-                            <span class="detail-item">⚡ ${station.ev_level1_evse_num || 0} Level 1</span>
-                            <span class="detail-item">🔌 ${station.ev_level2_evse_num || 0} Level 2</span>
-                            <span class="detail-item">⚡ ${station.ev_dc_fast_num || 0} DC Fast</span>
-                        </div>
-                        <div class="station-meta">
-                            <span class="access-code">${station.access_code === 'public' ? '🟢 Public' : '🟡 ' + (station.access_code || 'Unknown')}</span>
-                            <span class="status">${station.status_code === 'E' ? '✅ Available' : '❓ Check Status'}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            
-            stationContainer.innerHTML = stationsHTML + getPaginationHTML();
-        }
+            updateStats(allStations, statsElements);
+            displayStations();
+            setupFilters();
 
-        function getPaginationHTML() {
-            const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
-            if (totalPages <= 1) return '';
-            
-            const prevDisabled = currentPage === 1 ? 'disabled' : '';
-            const nextDisabled = currentPage === totalPages ? 'disabled' : '';
-            
-            return `
-                <div class="pagination">
-                    <button onclick="changePage(${currentPage - 1})" ${prevDisabled}>Previous</button>
-                    <span>Page ${currentPage} of ${totalPages} (${filteredStations.length.toLocaleString()} stations)</span>
-                    <button onclick="changePage(${currentPage + 1})" ${nextDisabled}>Next</button>
+        } catch (error) {
+            console.error('❌ Error loading stations from Netlify function:', error);
+            stationContainer.innerHTML = `
+                <div class="error-message">
+                    <h3>⚠️ Failed to Load Charging Stations</h3>
+                    <p>${error.message}</p>
+                    <button onclick="loadStations()" class="retry-btn">Retry</button>
                 </div>
             `;
         }
-
-        function changePage(newPage) {
-            const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
-            if (newPage >= 1 && newPage <= totalPages) {
-                currentPage = newPage;
-                displayStations();
-                document.getElementById('station-container').scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-
-        function setupFilters() {
-            const stateFilter = document.getElementById('state-filter');
-            const networkFilter = document.getElementById('network-filter');
-            const chargerFilter = document.getElementById('charger-filter');
-            
-            // Populate state filter
-            const states = [...new Set(allStations.map(s => s.state).filter(s => s))].sort();
-            stateFilter.innerHTML = '<option value="">All States</option>' + 
-                states.map(state => `<option value="${state}">${state}</option>`).join('');
-            
-            // Populate network filter
-            const networks = [...new Set(allStations.map(s => s.ev_network).filter(n => n))].sort();
-            networkFilter.innerHTML = '<option value="">All Networks</option>' + 
-                networks.map(network => `<option value="${network}">${network}</option>`).join('');
-            
-            // Add event listeners
-            [stateFilter, networkFilter, chargerFilter].forEach(filter => {
-                filter.addEventListener('change', applyFilters);
-            });
-            
-            // Search functionality
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                searchInput.addEventListener('input', applyFilters);
-            }
-        }
-
-        function applyFilters() {
-            const stateFilter = document.getElementById('state-filter').value;
-            const networkFilter = document.getElementById('network-filter').value;
-            const chargerFilter = document.getElementById('charger-filter').value;
-            const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
-            
-            filteredStations = allStations.filter(station => {
-                const matchesState = !stateFilter || station.state === stateFilter;
-                const matchesNetwork = !networkFilter || station.ev_network === networkFilter;
-                const matchesChargerType = !chargerFilter || 
-                    (chargerFilter === 'level1' && parseInt(station.ev_level1_evse_num) > 0) ||
-                    (chargerFilter === 'level2' && parseInt(station.ev_level2_evse_num) > 0) ||
-                    (chargerFilter === 'dcfast' && parseInt(station.ev_dc_fast_num) > 0);
-                const matchesSearch = !searchTerm || 
-                    station.station_name?.toLowerCase().includes(searchTerm) ||
-                    station.city?.toLowerCase().includes(searchTerm) ||
-                    station.street_address?.toLowerCase().includes(searchTerm);
-                    
-                return matchesState && matchesNetwork && matchesChargerType && matchesSearch;
-            });
-            
-            currentPage = 1;
-            displayStations();
-        }
-
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Performance tracking for analytics
-        function trackEvent(eventName, properties = {}) {
-            // Google Analytics tracking (uncomment when GA is set up)
-            // if (typeof gtag !== 'undefined') {
-            //     gtag('event', eventName, properties);
-            // }
-            console.log('Event tracked:', eventName, properties);
-        }
-
-        // Track user interactions
-        document.addEventListener('DOMContentLoaded', function() {
-            // Track search usage
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                searchInput.addEventListener('input', debounce(function() {
-                    if (this.value.length > 2) {
-                        trackEvent('search_used', { query_length: this.value.length });
-                    }
-                }, 1000));
-            }
-
-            // Track filter usage
-            ['state-filter', 'network-filter', 'charger-filter'].forEach(filterId => {
-                const filter = document.getElementById(filterId);
-                if (filter) {
-                    filter.addEventListener('change', function() {
-                        if (this.value) {
-                            trackEvent('filter_used', { filter_type: filterId, value: this.value });
-                        }
-                    });
-                }
-            });
-        });
-
-        // Debounce function for search
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Error reporting
-        window.addEventListener('error', function(e) {
-            console.error('JavaScript error:', e.error);
-            // Could send to error tracking service here
-        });
-
-        // Service Worker for offline functionality (optional)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                // Uncomment to enable service worker
-                // navigator.serviceWorker.register('/sw.js')
-                //     .then(function(registration) {
-                //         console.log('SW registered: ', registration);
-                //     })
-                //     .catch(function(registrationError) {
-                //         console.log('SW registration failed: ', registrationError);
-                //     });
-            });
-        }
-    </script>
-
-    <!-- Schema.org structured data for better SEO -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Dataset",
-        "name": "Electric Vehicle Charging Stations",
-        "description": "Comprehensive database of electric vehicle charging stations across the United States",
-        "creator": {
-            "@type": "Organization",
-            "name": "National Renewable Energy Laboratory",
-            "url": "https://www.nrel.gov/"
-        },
-        "distributionContent": "Real-time charging station data including location, network, and charger specifications",
-        "spatialCoverage": {
-            "@type": "Place",
-            "geo": {
-                "@type": "GeoShape",
-                "box": "49.3457868 -95.15314 24.7433195 -66.94888"
-            },
-            "name": "United States"
-        },
-        "temporalCoverage": "2025",
-        "keywords": [
-            "electric vehicle",
-            "charging stations",
-            "EV infrastructure",
-            "renewable energy",
-            "transportation"
-        ]
     }
-    </script>
-</body>
-</html>
-                
+
+    function updateStats(stations, statsElements) {
+        const totalStations = stations.length;
+        const uniqueNetworks = new Set(stations.map(s => s.ev_network).filter(n => n)).size;
+        const uniqueStates = new Set(stations.map(s => s.state).filter(s => s)).size;
+        const fastChargers = stations.filter(s => s.ev_dc_fast_num && parseInt(s.ev_dc_fast_num) > 0).length;
+
+        animateCounter(statsElements.total, totalStations);
+        animateCounter(statsElements.networks, uniqueNetworks);
+        animateCounter(statsElements.states, uniqueStates);
+        animateCounter(statsElements.fastChargers, fastChargers);
+    }
+
+    function animateCounter(element, targetValue) {
+        if (!element) return;
+        let currentValue = 0;
+        const increment = Math.ceil(targetValue / 50);
+        const timer = setInterval(() => {
+            currentValue += increment;
+            if (currentValue >= targetValue) {
+                currentValue = targetValue;
+                clearInterval(timer);
+            }
+            element.textContent = currentValue.toLocaleString();
+        }, 30);
+    }
+
+    function displayStations() {
+        const stationContainer = document.getElementById('station-container');
+        const startIndex = (currentPage - 1) * stationsPerPage;
+        const endIndex = startIndex + stationsPerPage;
+        const stationsToShow = filteredStations.slice(startIndex, endIndex);
+
+        if (stationsToShow.length === 0) {
+            stationContainer.innerHTML = '<div class="no-results">No charging stations found matching your criteria.</div>';
+            return;
+        }
+
+        const stationsHTML = stationsToShow.map(station => `
+            <div class="station-card">
+                <div class="station-header">
+                    <h3>${station.station_name || 'Unknown Station'}</h3>
+                    <div class="network-badge">${station.ev_network || 'Independent'}</div>
+                </div>
+                <div class="station-info">
+                    <p class="address">📍 ${station.street_address}, ${station.city}, ${station.state} ${station.zip}</p>
+                    <div class="station-details">
+                        <span class="detail-item">⚡ ${station.ev_level1_evse_num || 0} Level 1</span>
+                        <span class="detail-item">🔌 ${station.ev_level2_evse_num || 0} Level 2</span>
+                        <span class="detail-item">⚡ ${station.ev_dc_fast_num || 0} DC Fast</span>
+                    </div>
+                    <div class="station-meta">
+                        <span class="access-code">${station.access_code === 'public' ? '🟢 Public' : '🟡 ' + (station.access_code || 'Unknown')}</span>
+                        <span class="status">${station.status_code === 'E' ? '✅ Available' : '❓ Check Status'}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        stationContainer.innerHTML = stationsHTML + getPaginationHTML();
+    }
+
+    function getPaginationHTML() {
+        const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
+        if (totalPages <= 1) return '';
+
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
+        const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+
+        return `
+            <div class="pagination">
+                <button onclick="changePage(${currentPage - 1})" ${prevDisabled}>Previous</button>
+                <span>Page ${currentPage} of ${totalPages} (${filteredStations.length.toLocaleString()} stations)</span>
+                <button onclick="changePage(${currentPage + 1})" ${nextDisabled}>Next</button>
+            </div>
+        `;
+    }
+
+    function changePage(newPage) {
+        const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            displayStations();
+            document.getElementById('station-container').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function setupFilters() {
+        const stateFilter = document.getElementById('state-filter');
+        const networkFilter = document.getElementById('network-filter');
+        const chargerFilter = document.getElementById('charger-filter');
+
+        const states = [...new Set(allStations.map(s => s.state).filter(s => s))].sort();
+        stateFilter.innerHTML = '<option value="">All States</option>' +
+            states.map(state => `<option value="${state}">${state}</option>`).join('');
+
+        const networks = [...new Set(allStations.map(s => s.ev_network).filter(n => n))].sort();
+        networkFilter.innerHTML = '<option value="">All Networks</option>' +
+            networks.map(network => `<option value="${network}">${network}</option>`).join('');
+
+        [stateFilter, networkFilter, chargerFilter].forEach(filter => {
+            filter.addEventListener('change', applyFilters);
+        });
+
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+        }
+    }
+
+    function applyFilters() {
+        const stateFilter = document.getElementById('state-filter').value;
+        const networkFilter = document.getElementById('network-filter').value;
+        const chargerFilter = document.getElementById('charger-filter').value;
+        const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+
+        filteredStations = allStations.filter(station => {
+            const matchesState = !stateFilter || station.state === stateFilter;
+            const matchesNetwork = !networkFilter || station.ev_network === networkFilter;
+            const matchesChargerType = !chargerFilter ||
+                (chargerFilter === 'level1' && parseInt(station.ev_level1_evse_num) > 0) ||
+                (chargerFilter === 'level2' && parseInt(station.ev_level2_evse_num) > 0) ||
+                (chargerFilter === 'dcfast' && parseInt(station.ev_dc_fast_num) > 0);
+            const matchesSearch = !searchTerm ||
+                station.station_name?.toLowerCase().includes(searchTerm) ||
+                station.city?.toLowerCase().includes(searchTerm) ||
+                station.street_address?.toLowerCase().includes(searchTerm);
+
+            return matchesState && matchesNetwork && matchesChargerType && matchesSearch;
+        });
+
+        currentPage = 1;
+        displayStations();
+    }
+</script>
