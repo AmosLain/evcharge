@@ -891,34 +891,29 @@
                     console.log('❌ Vercel API error:', vercelError.message);
                 }
 
-                // If Vercel API fails, try direct NREL (will likely fail due to CORS)
-                if (!data) {
-                    try {
-                        console.log('🔄 Trying direct NREL API...');
-                        updateApiStatus('loading', 'Trying direct NREL API...');
-                        
-                        const params = new URLSearchParams({
-                            api_key: CONFIG.NREL_API_KEY,
-                            fuel_type: 'ELEC',
-                            status: 'E',
-                            limit: '1000',
-                            format: 'json'
-                        });
-
-                        const response = await fetch(CONFIG.NREL_BASE_URL + '?' + params, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        });
-                        
-                        if (response.ok) {
-                            data = await response.json();
-                            console.log('✅ Direct NREL API successful');
+                // Try direct NREL API call (since we know it works)
+                try {
+                    console.log('🚀 Trying direct NREL API...');
+                    updateApiStatus('loading', 'Connecting directly to NREL...');
+                    
+                    const directUrl = 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh&fuel_type=ELEC&limit=1000';
+                    
+                    const response = await fetch(directUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
                         }
-                    } catch (directError) {
-                        console.log('❌ Direct NREL API failed:', directError.message);
+                    });
+                    
+                    if (response.ok) {
+                        data = await response.json();
+                        console.log('✅ Direct NREL API successful:', data.fuel_stations.length, 'stations');
+                        updateApiStatus('loading', `Loaded ${data.fuel_stations.length} stations directly from NREL`);
+                    } else {
+                        console.log('❌ Direct NREL API failed:', response.status, response.statusText);
                     }
+                } catch (directError) {
+                    console.log('❌ Direct NREL API error:', directError.message);
                 }
 
                 // If all API methods fail, use enhanced sample data
