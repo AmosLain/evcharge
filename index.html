@@ -58,21 +58,13 @@
   </footer>
 
   <script>
-    // A global variable to store all fetched stations for efficient searching.
-    let allStations = [];
-
     // This function fetches charging station data from the Netlify function.
     async function loadStations() {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
-
       try {
         console.log('Fetching from Netlify function...');
         // The fetch call points to the Netlify function
-        const response = await fetch('/.netlify/functions/stations', { signal: controller.signal });
+        const response = await fetch('/.netlify/functions/stations');
         
-        clearTimeout(timeoutId);
-
         if (!response.ok) {
           throw new Error(`Netlify function error: ${response.status} ${response.statusText}`);
         }
@@ -82,29 +74,17 @@
         if (data.success) {
           // Log the number of stations to the console for debugging
           console.log(`Successfully loaded ${data.stations.length} stations from the API.`);
-          allStations = data.stations; // Store the full list
-          renderStations(allStations);
-          document.getElementById('status').textContent = `Loaded ${allStations.length} charging stations`;
-          gtag('event', 'stations_loaded', { count: allStations.length });
+          renderStations(data.stations);
+          document.getElementById('status').textContent = `Loaded ${data.stations.length} charging stations`;
+          gtag('event', 'stations_loaded', { count: data.stations.length });
         } else {
           console.error('Netlify function failed:', data.error);
-          document.getElementById('status').textContent = `Failed to load stations: ${data.error}`;
+          document.getElementById('status').textContent = 'Failed to load stations';
         }
       } catch (error) {
-        clearTimeout(timeoutId);
         console.error('Fetch error:', error);
-        
-        let errorMessage = 'Error loading stations. Please check your Netlify function logs.';
-        if (error.name === 'AbortError') {
-          errorMessage = 'The request timed out. The Netlify function may be taking too long to respond.';
-        } else if (error.message.includes('Failed to fetch')) {
-          errorMessage = 'Network error or CORS issue. Could not connect to the Netlify function.';
-        } else {
-          errorMessage = error.message;
-        }
-
-        document.getElementById('status').textContent = errorMessage;
-        gtag('event', 'stations_load_error', { error: errorMessage });
+        document.getElementById('status').textContent = 'Error loading stations';
+        gtag('event', 'stations_load_error', { error: error.message });
       }
     }
 
@@ -112,8 +92,8 @@
     function renderStations(stations) {
       const stationsDiv = document.getElementById('stations');
       stationsDiv.innerHTML = ''; // Clear existing content
-      // Removed the .slice(0, 50) to display all stations fetched by the API
-      stations.forEach(station => {
+      // Limit the display to the first 50 stations for performance, as per the original code.
+      stations.slice(0, 50).forEach(station => {
         const card = document.createElement('div');
         card.className = 'station-card bg-white p-4 rounded-md shadow-md';
         card.innerHTML = `
@@ -127,26 +107,29 @@
     }
 
     // Basic search functionality
-    document.getElementById('search').addEventListener('input', (e) => {
+    document.getElementById('search').addEventListener('input', async (e) => {
       const query = e.target.value.toLowerCase();
-      // If there are no stations loaded yet, do nothing
-      if (allStations.length === 0) {
-        return;
-      }
-
       if (query.length < 3) {
-        renderStations(allStations); // Reset to full list
-        document.getElementById('status').textContent = `Loaded ${allStations.length} charging stations`;
+        loadStations(); // Reset to full list
         return;
       }
-      
-      const filtered = allStations.filter(station => 
-        (station.city && station.city.toLowerCase().includes(query)) ||
-        (station.zip && station.zip.toLowerCase().includes(query))
-      );
-      renderStations(filtered);
-      document.getElementById('status').textContent = `Found ${filtered.length} stations matching "${query}"`;
-      gtag('event', 'search', { query: query, results: filtered.length });
+      try {
+        const response = await fetch('/.netlify/functions/stations');
+        if (!response.ok) throw new Error('Fetch failed');
+        const data = await response.json();
+        if (data.success) {
+          const filtered = data.stations.filter(station => 
+            (station.city && station.city.toLowerCase().includes(query)) ||
+            (station.zip && station.zip.toLowerCase().includes(query))
+          );
+          renderStations(filtered);
+          document.getElementById('status').textContent = `Found ${filtered.length} stations matching "${query}"`;
+          gtag('event', 'search', { query: query, results: filtered.length });
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        document.getElementById('status').textContent = 'Error searching stations';
+      }
     });
 
     // Load stations on page load
