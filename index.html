@@ -58,6 +58,9 @@
   </footer>
 
   <script>
+    // A global variable to store all fetched stations for efficient searching.
+    let allStations = [];
+
     // This function fetches charging station data from the Netlify function.
     async function loadStations() {
       const controller = new AbortController();
@@ -79,9 +82,10 @@
         if (data.success) {
           // Log the number of stations to the console for debugging
           console.log(`Successfully loaded ${data.stations.length} stations from the API.`);
-          renderStations(data.stations);
-          document.getElementById('status').textContent = `Loaded ${data.stations.length} charging stations`;
-          gtag('event', 'stations_loaded', { count: data.stations.length });
+          allStations = data.stations; // Store the full list
+          renderStations(allStations);
+          document.getElementById('status').textContent = `Loaded ${allStations.length} charging stations`;
+          gtag('event', 'stations_loaded', { count: allStations.length });
         } else {
           console.error('Netlify function failed:', data.error);
           document.getElementById('status').textContent = `Failed to load stations: ${data.error}`;
@@ -123,29 +127,26 @@
     }
 
     // Basic search functionality
-    document.getElementById('search').addEventListener('input', async (e) => {
+    document.getElementById('search').addEventListener('input', (e) => {
       const query = e.target.value.toLowerCase();
-      if (query.length < 3) {
-        loadStations(); // Reset to full list
+      // If there are no stations loaded yet, do nothing
+      if (allStations.length === 0) {
         return;
       }
-      try {
-        const response = await fetch('/.netlify/functions/stations');
-        if (!response.ok) throw new Error('Fetch failed');
-        const data = await response.json();
-        if (data.success) {
-          const filtered = data.stations.filter(station => 
-            (station.city && station.city.toLowerCase().includes(query)) ||
-            (station.zip && station.zip.toLowerCase().includes(query))
-          );
-          renderStations(filtered);
-          document.getElementById('status').textContent = `Found ${filtered.length} stations matching "${query}"`;
-          gtag('event', 'search', { query: query, results: filtered.length });
-        }
-      } catch (error) {
-        console.error('Search error:', error);
-        document.getElementById('status').textContent = 'Error searching stations';
+
+      if (query.length < 3) {
+        renderStations(allStations); // Reset to full list
+        document.getElementById('status').textContent = `Loaded ${allStations.length} charging stations`;
+        return;
       }
+      
+      const filtered = allStations.filter(station => 
+        (station.city && station.city.toLowerCase().includes(query)) ||
+        (station.zip && station.zip.toLowerCase().includes(query))
+      );
+      renderStations(filtered);
+      document.getElementById('status').textContent = `Found ${filtered.length} stations matching "${query}"`;
+      gtag('event', 'search', { query: query, results: filtered.length });
     });
 
     // Load stations on page load
