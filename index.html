@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -97,17 +58,22 @@
   </footer>
 
   <script>
+    // This function fetches charging station data from the Netlify function.
     async function loadStations() {
       try {
         console.log('Fetching from Netlify function...');
+        // The fetch call points to the Netlify function
         const response = await fetch('/.netlify/functions/stations');
+        
         if (!response.ok) {
           throw new Error(`Netlify function error: ${response.status}`);
         }
+        
         const data = await response.json();
         
         if (data.success) {
-          console.log(`Loaded ${data.stations.length} stations`);
+          // Log the number of stations to the console for debugging
+          console.log(`Successfully loaded ${data.stations.length} stations from the API.`);
           renderStations(data.stations);
           document.getElementById('status').textContent = `Loaded ${data.stations.length} charging stations`;
           gtag('event', 'stations_loaded', { count: data.stations.length });
@@ -122,11 +88,12 @@
       }
     }
 
+    // This function renders the stations to the HTML.
     function renderStations(stations) {
       const stationsDiv = document.getElementById('stations');
       stationsDiv.innerHTML = ''; // Clear existing content
-      // Limit to 50 stations for performance; adjust as needed
-      stations.slice(0, 50).forEach(station => {
+      // Removed the .slice(0, 50) to display all stations fetched by the API
+      stations.forEach(station => {
         const card = document.createElement('div');
         card.className = 'station-card bg-white p-4 rounded-md shadow-md';
         card.innerHTML = `
@@ -164,9 +131,3 @@
         document.getElementById('status').textContent = 'Error searching stations';
       }
     });
-
-    // Load stations on page load
-    loadStations();
-  </script>
-</body>
-</html>
