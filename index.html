@@ -3,1810 +3,953 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV ChargeMap - Find Electric Vehicle Charging Stations Near You</title>
-    <meta name="description" content="Find real-time EV charging stations with live availability, pricing, and reviews. Search 60,000+ electric vehicle charging locations across the US.">
-    <meta name="keywords" content="EV charging stations, electric vehicle charging, Tesla supercharger, ChargePoint, Electrify America, EV charging near me">
+    <title>EV ChargeMap - Find Electric Vehicle Charging Stations</title>
+    <meta name="description" content="Find 60,000+ electric vehicle charging stations across the United States. Real-time data from NREL government database with search and filter options.">
+    <meta name="keywords" content="EV charging stations, electric vehicle, charging map, Tesla, ChargePoint, Electrify America">
     <meta name="author" content="EV ChargeMap">
-    <meta name="robots" content="index, follow">
     
-    <!-- Open Graph Tags -->
+    <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="EV ChargeMap - Find Electric Vehicle Charging Stations">
-    <meta property="og:description" content="Real-time EV charging station directory with live availability and pricing">
+    <meta property="og:description" content="Discover 60,000+ EV charging stations with real-time data from government sources">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://evchargemap.com">
-    <meta property="og:image" content="https://evchargemap.com/og-image.jpg">
+    <meta property="og:image" content="https://keen-madeleine-7719a0.netlify.app/og-image.jpg">
+    <meta property="og:url" content="https://keen-madeleine-7719a0.netlify.app/">
     
-    <!-- Twitter Card -->
+    <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="EV ChargeMap - Find Charging Stations">
-    <meta name="twitter:description" content="Real-time EV charging station directory">
-    <meta name="twitter:image" content="https://evchargemap.com/twitter-image.jpg">
+    <meta name="twitter:title" content="EV ChargeMap - Find Electric Vehicle Charging Stations">
+    <meta name="twitter:description" content="Discover 60,000+ EV charging stations with real-time data">
+    <meta name="twitter:image" content="https://keen-madeleine-7719a0.netlify.app/og-image.jpg">
     
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://evchargemap.com">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    
-    <!-- Schema.org JSON-LD -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "WebSite",
+        "@type": "WebApplication",
         "name": "EV ChargeMap",
-        "description": "Find electric vehicle charging stations with real-time availability",
-        "url": "https://evchargemap.com",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://evchargemap.com/search?q={search_term_string}",
-            "query-input": "required name=search_term_string"
+        "description": "Find electric vehicle charging stations across the United States",
+        "url": "https://keen-madeleine-7719a0.netlify.app/",
+        "applicationCategory": "Utility",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
         }
     }
     </script>
-
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    
+    <!-- Google Analytics (Ready for your tracking ID) -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
     <script>
-        // Google Analytics (replace GA_MEASUREMENT_ID with your actual ID in production)
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'GA_MEASUREMENT_ID');
-        
-        // Track custom events
-        function trackEvent(eventName, parameters) {
-            gtag('event', eventName, parameters);
-        }
-        
-        console.log('🚀 Google Analytics ready for production (replace GA_MEASUREMENT_ID)');
-    </script>
-
+        gtag('config', 'GA_TRACKING_ID');
+    </script> -->
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #2c3e50;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #00b4db 100%);
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-
+        
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
-
-        /* Loading States */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 4rem;
-            color: #666;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #00b4db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* API Status Indicator */
-        .api-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(39, 174, 96, 0.95);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            z-index: 1500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .api-status.loading {
-            background: rgba(241, 196, 15, 0.95);
-        }
-
-        .api-status.error {
-            background: rgba(231, 76, 60, 0.95);
-        }
-
-        .api-status.success {
-            background: rgba(39, 174, 96, 0.95);
-        }
-
+        
         /* Header */
-        header {
+        .header {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
-            z-index: 1000;
-            border-bottom: 3px solid #00b4db;
+            z-index: 100;
         }
-
+        
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
+            flex-wrap: wrap;
         }
-
+        
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
             text-decoration: none;
         }
-
-        .logo-icon {
-            font-size: 2.5rem;
-            background: linear-gradient(45deg, #00b4db, #0083b0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .logo-text {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .search-container {
-            position: relative;
-            flex: 1;
-            max-width: 500px;
-            margin: 0 2rem;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 15px 20px 15px 55px;
-            border: 2px solid #00b4db;
-            border-radius: 30px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.95);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: #0083b0;
-            background: white;
-            box-shadow: 0 6px 25px rgba(0, 180, 219, 0.3);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #00b4db;
-            font-size: 20px;
-        }
-
-        .location-btn {
-            background: linear-gradient(45deg, #e67e22, #d35400);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        
+        .nav {
             display: flex;
+            gap: 2rem;
             align-items: center;
-            gap: 8px;
         }
-
-        .location-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+        
+        .nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
         }
-
-        .location-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        
+        .nav a:hover {
+            color: #667eea;
         }
-
+        
         /* Hero Section */
         .hero {
             text-align: center;
             padding: 4rem 0;
             color: white;
-            position: relative;
         }
-
+        
         .hero h1 {
-            font-size: 4rem;
+            font-size: 3rem;
             margin-bottom: 1rem;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            font-weight: bold;
         }
-
+        
         .hero p {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
             opacity: 0.95;
-            max-width: 600px;
-            margin: 0 auto 2rem auto;
         }
-
-        .hero-features {
-            display: flex;
-            justify-content: center;
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 2rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
+            margin-top: 3rem;
         }
-
-        .hero-feature {
-            background: rgba(255, 255, 255, 0.2);
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            padding: 1rem 1.5rem;
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 600;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
+        
+        .feature-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
         /* Stats Section */
         .stats {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            margin: -2rem auto 3rem;
-            max-width: 1000px;
+            background: white;
+            padding: 3rem 0;
+            margin: 2rem 0;
             border-radius: 20px;
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            position: relative;
-            z-index: 10;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
-
-        .stat-item {
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
             text-align: center;
         }
-
+        
+        .stat-item {
+            padding: 1rem;
+        }
+        
         .stat-number {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #00b4db;
+            color: #667eea;
             display: block;
         }
-
+        
         .stat-label {
+            font-size: 0.9rem;
             color: #666;
-            font-size: 1rem;
             margin-top: 0.5rem;
         }
-
-        .last-updated {
-            font-size: 0.8rem;
-            color: #999;
-            margin-top: 0.3rem;
-        }
-
-        /* Filters */
-        .filters {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+        
+        /* Search and Filters */
+        .search-section {
+            background: white;
             padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .filter-section {
-            margin-bottom: 2rem;
-        }
-
-        .filter-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            color: #2c3e50;
-        }
-
-        .filter-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .filter-tag {
-            background: linear-gradient(45deg, #00b4db, #0083b0);
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border: 2px solid transparent;
-        }
-
-        .filter-tag:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 180, 219, 0.3);
-        }
-
-        .filter-tag.active {
-            background: linear-gradient(45deg, #27ae60, #2ecc71);
-            border-color: #00b4db;
-            transform: translateY(-2px);
-        }
-
-        /* Station Grid */
-        .stations-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-
-        .station-card {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            transition: all 0.4s ease;
-            border: 1px solid rgba(0, 180, 219, 0.3);
-        }
-
-        .station-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-        }
-
-        .station-header {
-            background: linear-gradient(45deg, #00b4db, #0083b0);
-            color: white;
-            padding: 1.5rem;
-        }
-
-        .station-name {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .station-address {
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .station-content {
-            padding: 1.5rem;
-        }
-
-        .station-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .detail-icon {
-            font-size: 1.1rem;
-            color: #00b4db;
-        }
-
-        .station-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-tag {
-            background: rgba(0, 180, 219, 0.1);
-            color: #0083b0;
-            padding: 0.3rem 0.8rem;
             border-radius: 15px;
-            font-size: 0.8rem;
-            border: 1px solid rgba(0, 180, 219, 0.2);
+            margin: 2rem 0;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
         }
-
-        .station-actions {
+        
+        .search-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .input-group {
             display: flex;
-            gap: 0.5rem;
+            flex-direction: column;
+        }
+        
+        .input-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .input-group input,
+        .input-group select {
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* Station Cards */
+        .stations-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            text-align: center;
+        }
+        
+        .station-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .station-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .station-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+        
+        .station-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .station-header h3 {
+            font-size: 1.1rem;
+            color: #333;
+            margin: 0;
+            flex: 1;
+            margin-right: 1rem;
+        }
+        
+        .network-badge {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .station-info .address {
+            color: #666;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .station-details {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
             flex-wrap: wrap;
         }
-
-        .action-btn {
-            padding: 0.6rem 1.2rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        
+        .detail-item {
+            background: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .station-meta {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
+            font-size: 0.8rem;
         }
-
-        .btn-directions {
-            background: #00b4db;
+        
+        .access-code {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .status {
+            font-weight: 500;
+        }
+        
+        /* Loading and Error States */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .error-message h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .retry-btn {
+            background: #667eea;
             color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: background 0.3s ease;
         }
-
-        .btn-directions:hover {
-            background: #0083b0;
-            transform: translateY(-2px);
+        
+        .retry-btn:hover {
+            background: #5a6fd8;
         }
-
-        .btn-website {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-website:hover {
-            background: #229954;
-            transform: translateY(-2px);
-        }
-
+        
         .no-results {
             text-align: center;
-            padding: 4rem;
+            padding: 3rem;
             color: #666;
-            font-size: 1.2rem;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            margin: 2rem 0;
+            font-size: 1.1rem;
         }
-
+        
         /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 1rem;
-            margin: 3rem 0;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
         }
-
+        
         .pagination button {
-            background: linear-gradient(45deg, #00b4db, #0083b0);
+            background: #667eea;
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
         }
-
+        
         .pagination button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+            background: #5a6fd8;
         }
-
+        
         .pagination button:disabled {
-            opacity: 0.5;
+            background: #ccc;
             cursor: not-allowed;
         }
-
-        .pagination .page-info {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
+        
         /* Footer */
-        footer {
-            background: rgba(30, 60, 114, 0.95);
-            color: white;
-            padding: 3rem 0;
-            margin-top: 4rem;
-            border-top: 3px solid #00b4db;
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 3rem;
         }
-
+        
         .footer-content {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-bottom: 2rem;
         }
-
+        
         .footer-section h3 {
+            color: #333;
             margin-bottom: 1rem;
-            color: #00b4db;
         }
-
+        
+        .footer-section p,
         .footer-section a {
-            color: #ccc;
+            color: #666;
             text-decoration: none;
-            display: block;
-            margin-bottom: 0.5rem;
-            transition: color 0.3s ease;
+            line-height: 1.8;
         }
-
+        
         .footer-section a:hover {
-            color: #00b4db;
+            color: #667eea;
         }
-
+        
         .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid #e9ecef;
+            padding-top: 1rem;
+            color: #666;
         }
-
+        
         /* Responsive Design */
         @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .station-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
             }
-
-            .search-container {
-                margin: 0;
-                max-width: 100%;
-                order: 3;
+            
+            .nav {
+                order: 2;
             }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero-features {
-                gap: 1rem;
-            }
-
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-                margin: -1rem auto 2rem;
-            }
-
-            .stations-grid {
+        }
+        
+        @media (max-width: 480px) {
+            .features {
                 grid-template-columns: 1fr;
             }
-
-            .filter-options {
-                justify-content: center;
-            }
-
-            .station-details {
+            
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
-        }
-
-        /* SEO-friendly hidden elements */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        /* Performance optimizations */
-        .lazy-load {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .lazy-load.loaded {
-            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <!-- API Status Indicator -->
-    <div class="api-status" id="apiStatus">
-        <span class="spinner"></span>
-        <span>Loading stations...</span>
-    </div>
-
-    <header>
+    <!-- Header -->
+    <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="/" class="logo">
-                    <span class="logo-icon">⚡</span>
-                    <span class="logo-text">EV ChargeMap</span>
-                </a>
-                <div class="search-container">
-                    <div class="search-icon">🔍</div>
-                    <input type="text" id="searchBox" class="search-box" 
-                           placeholder="Search stations by city, network, or zip code..."
-                           aria-label="Search for EV charging stations">
-                </div>
-                <button class="location-btn" id="locationBtn" onclick="findNearbyStations()">
-                    📍 Find Near Me
-                </button>
+                <a href="#" class="logo">⚡ EV ChargeMap</a>
+                <nav class="nav">
+                    <a href="#search">Find Stations</a>
+                    <a href="#about">About</a>
+                    <a href="#contact">Contact</a>
+                </nav>
             </div>
         </div>
     </header>
 
-    <main class="container">
-        <section class="hero">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
             <h1>Find EV Charging Stations</h1>
             <p>Discover 60,000+ electric vehicle charging stations across the United States with real-time data from government sources</p>
-            <div class="hero-features">
-                <div class="hero-feature">
-                    🗺️ 60K+ Stations
+            
+            <div class="features">
+                <div class="feature-card">
+                    <h3>🗺️ 60K+ Stations</h3>
                 </div>
-                <div class="hero-feature">
-                    📊 Live Data
+                <div class="feature-card">
+                    <h3>📊 Live Data</h3>
                 </div>
-                <div class="hero-feature">
-                    🔍 Smart Search
+                <div class="feature-card">
+                    <h3>🔍 Smart Search</h3>
                 </div>
-                <div class="hero-feature">
-                    📱 Mobile Friendly
-                </div>
-            </div>
-        </section>
-
-        <section class="stats">
-            <div class="stat-item">
-                <span class="stat-number" id="totalStations">0</span>
-                <div class="stat-label">Charging Stations</div>
-                <div class="last-updated" id="lastUpdatedStations">Loading...</div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number" id="totalNetworks">0</span>
-                <div class="stat-label">Networks</div>
-                <div class="last-updated" id="lastUpdatedNetworks">Loading...</div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number" id="totalStates">0</span>
-                <div class="stat-label">States Covered</div>
-                <div class="last-updated" id="lastUpdatedStates">Loading...</div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number" id="fastChargers">0</span>
-                <div class="stat-label">DC Fast Chargers</div>
-                <div class="last-updated">Updated daily</div>
-            </div>
-        </section>
-
-        <section class="filters">
-            <div class="filter-section">
-                <div class="filter-title">Filter by State</div>
-                <div class="filter-options" id="stateFilters">
-                    <div class="filter-tag active" data-filter="all">All States</div>
-                    <!-- States will be populated dynamically -->
+                <div class="feature-card">
+                    <h3>📱 Mobile Friendly</h3>
                 </div>
             </div>
-
-            <div class="filter-section">
-                <div class="filter-title">Filter by Network</div>
-                <div class="filter-options" id="networkFilters">
-                    <div class="filter-tag active" data-filter="all">All Networks</div>
-                    <!-- Networks will be populated dynamically -->
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <div class="filter-title">Filter by Charger Type</div>
-                <div class="filter-options" id="chargerFilters">
-                    <div class="filter-tag active" data-filter="all">All Types</div>
-                    <div class="filter-tag" data-filter="dc_fast">DC Fast Charging</div>
-                    <div class="filter-tag" data-filter="level2">Level 2 (AC)</div>
-                    <div class="filter-tag" data-filter="level1">Level 1</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="stations-grid" id="stationsGrid">
-            <div class="loading">
-                <div class="spinner"></div>
-                <span>Loading charging stations from NREL database...</span>
-            </div>
-        </section>
-
-        <div class="pagination" id="pagination" style="display: none;">
-            <button id="prevBtn" onclick="changePage(-1)">← Previous</button>
-            <div class="page-info" id="pageInfo">Page 1 of 1</div>
-            <button id="nextBtn" onclick="changePage(1)">Next →</button>
         </div>
+    </section>
 
-        <div class="no-results" id="noResults" style="display: none;">
-            <h3>No charging stations found</h3>
-            <p>Try adjusting your search criteria or browse all available stations.</p>
+    <!-- Stats Section -->
+    <section class="container">
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number stat-total">0</span>
+                    <div class="stat-label">Charging Stations</div>
+                    <div class="stat-sublabel">Loading...</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number stat-networks">0</span>
+                    <div class="stat-label">Networks</div>
+                    <div class="stat-sublabel">Loading...</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number stat-states">0</span>
+                    <div class="stat-label">States Covered</div>
+                    <div class="stat-sublabel">Loading...</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number stat-fast-chargers">0</span>
+                    <div class="stat-label">DC Fast Chargers</div>
+                    <div class="stat-sublabel">Updated daily</div>
+                </div>
+            </div>
         </div>
-    </main>
+    </section>
 
-    <footer>
+    <!-- Search and Filters -->
+    <section class="container" id="search">
+        <div class="search-section">
+            <div class="search-grid">
+                <div class="input-group">
+                    <label for="search-input">Search Stations</label>
+                    <input type="text" id="search-input" placeholder="Enter city, station name, or address...">
+                </div>
+                <div class="input-group">
+                    <label for="state-filter">Filter by State</label>
+                    <select id="state-filter">
+                        <option value="">All States</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="network-filter">Filter by Network</label>
+                    <select id="network-filter">
+                        <option value="">All Networks</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="charger-filter">Filter by Charger Type</label>
+                    <select id="charger-filter">
+                        <option value="">All Types</option>
+                        <option value="level1">Level 1</option>
+                        <option value="level2">Level 2</option>
+                        <option value="dcfast">DC Fast</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stations Section -->
+    <section class="container">
+        <div class="stations-section">
+            <h2 class="section-title">Electric Vehicle Charging Stations</h2>
+            <div id="station-container" class="station-grid">
+                <div class="loading">Loading charging stations from NREL database...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="about">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>Explore</h3>
-                    <a href="/stations">All Stations</a>
-                    <a href="/networks">Networks</a>
-                    <a href="/states">By State</a>
-                    <a href="/fast-charging">DC Fast Charging</a>
+                    <h3>About EV ChargeMap</h3>
+                    <p>We provide comprehensive, real-time data on electric vehicle charging stations across the United States, sourced directly from the National Renewable Energy Laboratory (NREL) government database.</p>
                 </div>
                 <div class="footer-section">
-                    <h3>Resources</h3>
-                    <a href="/api">API Access</a>
-                    <a href="/blog">EV Charging Guide</a>
-                    <a href="/submit">Submit Station</a>
-                    <a href="/contact">Contact Us</a>
+                    <h3>Data Source</h3>
+                    <p>All charging station data is provided by the <a href="https://developer.nrel.gov/docs/transportation/alt-fuel-stations-v1/" target="_blank">NREL Alternative Fuel Stations API</a>, ensuring accuracy and reliability.</p>
                 </div>
-                <div class="footer-section">
-                    <h3>Data Sources</h3>
-                    <a href="https://developer.nrel.gov/" target="_blank" rel="noopener">NREL API</a>
-                    <a href="https://afdc.energy.gov/" target="_blank" rel="noopener">Alt Fuels Data Center</a>
-                    <a href="/privacy">Privacy Policy</a>
-                    <a href="/terms">Terms of Service</a>
+                <div class="footer-section" id="contact">
+                    <h3>Stay Updated</h3>
+                    <p>Our database is updated daily with the latest charging station information, including new installations and status changes.</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 EV ChargeMap. Data provided by the U.S. Department of Energy.</p>
+                <p>&copy; 2025 EV ChargeMap. Data provided by NREL. Built for EV drivers, by EV enthusiasts.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Production Configuration
-        const CONFIG = {
-            NREL_API_KEY: 'xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh',
-            NREL_BASE_URL: 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json',
-            ITEMS_PER_PAGE: 20,
-            CACHE_DURATION: 1000 * 60 * 60, // 1 hour
-            DEFAULT_SEARCH_RADIUS: 50, // miles
-            MAX_INITIAL_LOAD: 1000, // Limit initial load to 1000 stations
-            BATCH_SIZE: 200 // Process stations in batches
-        };
-
-        // Global State
+        // Global variables
         let allStations = [];
         let filteredStations = [];
         let currentPage = 1;
-        let currentFilters = {
-            state: 'all',
-            network: 'all',
-            charger: 'all',
-            search: ''
-        };
-        let userLocation = null;
+        const stationsPerPage = 20;
 
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initializeApp();
+        // Load stations when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStations();
         });
 
-        async function initializeApp() {
-            try {
-                updateApiStatus('loading', 'Loading station data...');
-                
-                // Load stations from NREL API
-                await loadNRELStations();
-                
-                // Set up event listeners
-                setupEventListeners();
-                
-                // Initial render
-                renderStations();
-                updateStats();
-                populateFilters();
-                
-                updateApiStatus('success', 'Loaded ' + allStations.length + ' stations');
-                
-                // Track page load
-                trackEvent('page_load', {
-                    'stations_loaded': allStations.length
-                });
-                
-            } catch (error) {
-                console.error('App initialization failed:', error);
-                updateApiStatus('error', 'Failed to load station data');
-                showError('Unable to load charging station data. Please try again later.');
-            }
-        }
-
-        async function loadNRELStations() {
-            const cacheKey = 'nrel_stations_cache';
-            const cacheTime = 'nrel_cache_time';
-            
-            // Check cache first
-            const cachedData = localStorage.getItem(cacheKey);
-            const cacheTimestamp = localStorage.getItem(cacheTime);
-            
-            if (cachedData && cacheTimestamp) {
-                const age = Date.now() - parseInt(cacheTimestamp);
-                if (age < CONFIG.CACHE_DURATION) {
-                    console.log('✅ Loading stations from cache');
-                    updateApiStatus('success', 'Loading from cache...');
-                    
-                    allStations = JSON.parse(cachedData);
-                    filteredStations = [...allStations];
-                    return;
-                }
-            }
-
-            try {
-                updateApiStatus('loading', 'Connecting to EV stations API...');
-                
-                // Try your Vercel serverless function first
-                let data = null;
-                
-                try {
-                    console.log('🚀 Trying Vercel serverless function...');
-                    const response = await fetch('/api/stations?limit=1000', {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const apiData = await response.json();
-                        if (apiData.success && apiData.stations) {
-                            data = { fuel_stations: apiData.stations };
-                            console.log('✅ Vercel API successful:', apiData.stations.length, 'stations');
-                            updateApiStatus('loading', `Loaded ${apiData.stations.length} stations from API`);
-                        }
-                    } else {
-                        console.log('❌ Vercel API failed:', response.status, response.statusText);
-                    }
-                } catch (vercelError) {
-                    console.log('❌ Vercel API error:', vercelError.message);
-                }
-
-                // Try direct NREL API call (since we know it works)
-                try {
-                    console.log('🚀 Trying direct NREL API...');
-                    updateApiStatus('loading', 'Connecting directly to NREL...');
-                    
-                    const directUrl = 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh&fuel_type=ELEC&limit=1000';
-                    
-                    const response = await fetch(directUrl, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        data = await response.json();
-                        console.log('✅ Direct NREL API successful:', data.fuel_stations.length, 'stations');
-                        updateApiStatus('loading', `Loaded ${data.fuel_stations.length} stations directly from NREL`);
-                    } else {
-                        console.log('❌ Direct NREL API failed:', response.status, response.statusText);
-                    }
-                } catch (directError) {
-                    console.log('❌ Direct NREL API error:', directError.message);
-                }
-
-                // If all API methods fail, use enhanced sample data
-                if (!data || !data.fuel_stations) {
-                    console.log('🔄 All API methods failed, using enhanced sample data');
-                    updateApiStatus('loading', 'Loading sample data...');
-                    await loadEnhancedSampleData();
-                    return;
-                }
-
-                updateApiStatus('loading', 'Processing station data...');
-                
-                console.log('📊 Raw API data:', data.fuel_stations.length, 'stations');
-
-                // Process stations in batches to prevent UI blocking
-                allStations = [];
-                const rawStations = data.fuel_stations;
-                
-                for (let i = 0; i < rawStations.length; i += CONFIG.BATCH_SIZE) {
-                    const batch = rawStations.slice(i, i + CONFIG.BATCH_SIZE);
-                    
-                    // Process batch - handle both NREL format and processed format
-                    const processedBatch = batch.map(station => {
-                        try {
-                            // Handle both raw NREL format and pre-processed format
-                            const isProcessed = station.level1_ports !== undefined;
-                            
-                            return {
-                                id: station.id || 'unknown-' + i,
-                                name: cleanStationName(station.name || station.station_name),
-                                address: station.address || station.street_address || 'Address not available',
-                                city: station.city || 'Unknown City',
-                                state: station.state || 'Unknown State',
-                                zip: station.zip || '',
-                                latitude: parseFloat(station.latitude) || 0,
-                                longitude: parseFloat(station.longitude) || 0,
-                                network: cleanNetworkName(station.network || station.ev_network),
-                                connectors: isProcessed ? 
-                                    parseProcessedConnectors(station) : 
-                                    parseConnectors(station),
-                                access: station.access || station.access_code || 'unknown',
-                                hours: station.hours || station.access_days_time || 'Hours not available',
-                                phone: station.phone || station.station_phone || '',
-                                website: station.website || station.ev_network_web || '',
-                                updated: station.updated || station.updated_at || new Date().toISOString(),
-                                features: parseFeatures(station)
-                            };
-                        } catch (error) {
-                            console.warn('Error processing station:', error);
-                            return null;
-                        }
-                    }).filter(station => 
-                        station &&
-                        station.latitude !== 0 && 
-                        station.longitude !== 0 && 
-                        station.name && 
-                        station.state &&
-                        station.name !== 'Unknown Station'
-                    );
-
-                    allStations.push(...processedBatch);
-                    
-                    // Update progress
-                    const progress = Math.min(100, Math.round((i / rawStations.length) * 100));
-                    updateApiStatus('loading', `Processing... ${progress}%`);
-                    
-                    // Allow UI to update between batches
-                    if (i % CONFIG.BATCH_SIZE === 0) {
-                        await new Promise(resolve => setTimeout(resolve, 10));
-                    }
-                }
-
-                filteredStations = [...allStations];
-
-                // Cache the processed data
-                try {
-                    localStorage.setItem(cacheKey, JSON.stringify(allStations));
-                    localStorage.setItem(cacheTime, Date.now().toString());
-                } catch (cacheError) {
-                    console.warn('Cache storage failed:', cacheError);
-                    localStorage.clear();
-                }
-                
-                console.log('✅ Successfully loaded', allStations.length, 'stations');
-                updateApiStatus('success', `Loaded ${allStations.length} charging stations`);
-                
-            } catch (error) {
-                console.error('❌ Error loading station data:', error);
-                
-                // Fallback to enhanced sample data
-                console.log('🔄 Falling back to enhanced sample data...');
-                await loadEnhancedSampleData();
-            }
-        }
-
-        function parseProcessedConnectors(station) {
-            // Handle pre-processed connector data from Vercel API
-            const connectors = [];
-            
-            if (station.level1_ports > 0) {
-                connectors.push({
-                    type: 'Level 1',
-                    count: station.level1_ports,
-                    power: '1.4 kW'
-                });
-            }
-            
-            if (station.level2_ports > 0) {
-                connectors.push({
-                    type: 'Level 2',
-                    count: station.level2_ports,
-                    power: '7-22 kW'
-                });
-            }
-            
-            if (station.dc_fast_ports > 0) {
-                connectors.push({
-                    type: 'DC Fast',
-                    count: station.dc_fast_ports,
-                    power: '50+ kW'
-                });
-            }
-            
-            return connectors;
-        }
-
-        async function loadEnhancedSampleData() {
-            // Enhanced sample data with more realistic stations across multiple states
-            const enhancedSampleStations = [
-                // California
-                {
-                    id: 1,
-                    station_name: "Tesla Supercharger - Fremont Factory",
-                    street_address: "45500 Fremont Blvd",
-                    city: "Fremont",
-                    state: "CA",
-                    zip: "94538",
-                    latitude: 37.4945,
-                    longitude: -121.9436,
-                    ev_network: "Tesla Supercharger",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 0,
-                    ev_dc_fast_num: 20,
-                    access_code: "public",
-                    access_days_time: "24 hours daily",
-                    station_phone: "(650) 681-5100",
-                    ev_network_web: "https://www.tesla.com/supercharger",
-                    updated_at: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    station_name: "Electrify America - Los Angeles Downtown",
-                    street_address: "1100 S Hope St",
-                    city: "Los Angeles",
-                    state: "CA",
-                    zip: "90015",
-                    latitude: 34.0405,
-                    longitude: -118.2672,
-                    ev_network: "Electrify America",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 4,
-                    ev_dc_fast_num: 8,
-                    access_code: "public",
-                    access_days_time: "24 hours daily",
-                    station_phone: "(833) 632-2778",
-                    ev_network_web: "https://www.electrifyamerica.com",
-                    updated_at: new Date().toISOString()
-                },
-                {
-                    id: 3,
-                    station_name: "ChargePoint - San Francisco Union Square",
-                    street_address: "333 Post St",
-                    city: "San Francisco",
-                    state: "CA",
-                    zip: "94108",
-                    latitude: 37.7879,
-                    longitude: -122.4074,
-                    ev_network: "ChargePoint Network",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 12,
-                    ev_dc_fast_num: 4,
-                    access_code: "public",
-                    access_days_time: "6am-11pm daily",
-                    station_phone: "(408) 841-4500",
-                    ev_network_web: "https://www.chargepoint.com",
-                    updated_at: new Date().toISOString()
-                },
-                // Texas
-                {
-                    id: 4,
-                    station_name: "Tesla Supercharger - Austin Downtown",
-                    street_address: "98 San Jacinto Blvd",
-                    city: "Austin",
-                    state: "TX",
-                    zip: "78701",
-                    latitude: 30.2640,
-                    longitude: -97.7431,
-                    ev_network: "Tesla Supercharger",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 0,
-                    ev_dc_fast_num: 16,
-                    access_code: "public",
-                    access_days_time: "24 hours daily",
-                    station_phone: "(512) 494-9200",
-                    ev_network_web: "https://www.tesla.com/supercharger",
-                    updated_at: new Date().toISOString()
-                },
-                {
-                    id: 5,
-                    station_name: "Electrify America - Houston Galleria",
-                    street_address: "5015 Westheimer Rd",
-                    city: "Houston",
-                    state: "TX",
-                    zip: "77056",
-                    latitude: 29.7372,
-                    longitude: -95.4618,
-                    ev_network: "Electrify America",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 2,
-                    ev_dc_fast_num: 10,
-                    access_code: "public",
-                    access_days_time: "24 hours daily",
-                    station_phone: "(833) 632-2778",
-                    ev_network_web: "https://www.electrifyamerica.com",
-                    updated_at: new Date().toISOString()
-                },
-                // Florida
-                {
-                    id: 6,
-                    station_name: "Tesla Supercharger - Miami Beach",
-                    street_address: "1111 Lincoln Rd",
-                    city: "Miami Beach",
-                    state: "FL",
-                    zip: "33139",
-                    latitude: 25.7907,
-                    longitude: -80.1421,
-                    ev_network: "Tesla Supercharger",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 0,
-                    ev_dc_fast_num: 12,
-                    access_code: "public",
-                    access_days_time: "24 hours daily",
-                    station_phone: "(305) 538-1111",
-                    ev_network_web: "https://www.tesla.com/supercharger",
-                    updated_at: new Date().toISOString()
-                },
-                {
-                    id: 7,
-                    station_name: "EVgo - Orlando International Airport",
-                    street_address: "1 Jeff Fuqua Blvd",
-                    city: "Orlando",
-                    state: "FL",
-                    zip: "32827",
-                    latitude: 28.4294,
-                    longitude: -81.3089,
-                    ev_network: "EVgo Network",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 6,
-                    ev_dc_fast_num: 8,
-                    access_code: "public",
-                    access_days_time: "24 hours daily",
-                    station_phone: "(877) 494-3833",
-                    ev_network_web: "https://www.evgo.com",
-                    updated_at: new Date().toISOString()
-                },
-                // New York
-                {
-                    id: 8,
-                    station_name: "ChargePoint - Manhattan Financial District",
-                    street_address: "123 Wall St",
-                    city: "New York",
-                    state: "NY",
-                    zip: "10005",
-                    latitude: 40.7074,
-                    longitude: -74.0113,
-                    ev_network: "ChargePoint Network",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 20,
-                    ev_dc_fast_num: 6,
-                    access_code: "public",
-                    access_days_time: "24 hours daily",
-                    station_phone: "(212) 635-9675",
-                    ev_network_web: "https://www.chargepoint.com",
-                    updated_at: new Date().toISOString()
-                },
-                {
-                    id: 9,
-                    station_name: "Blink Charging - Brooklyn Heights",
-                    street_address: "2 Remsen St",
-                    city: "Brooklyn",
-                    state: "NY",
-                    zip: "11201",
-                    latitude: 40.6956,
-                    longitude: -73.9965,
-                    ev_network: "Blink Network",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 8,
-                    ev_dc_fast_num: 2,
-                    access_code: "public",
-                    access_days_time: "6am-10pm daily",
-                    station_phone: "(877) 245-4638",
-                    ev_network_web: "https://www.blinkcharging.com",
-                    updated_at: new Date().toISOString()
-                },
-                // Washington
-                {
-                    id: 10,
-                    station_name: "Tesla Supercharger - Seattle Downtown",
-                    street_address: "2001 Western Ave",
-                    city: "Seattle",
-                    state: "WA",
-                    zip: "98121",
-                    latitude: 47.6131,
-                    longitude: -122.3444,
-                    ev_network: "Tesla Supercharger",
-                    ev_level1_evse_num: 0,
-                    ev_level2_evse_num: 0,
-                    ev_dc_fast_num: 14,
-                    access_code: "public",
-                    access_days_time: "24 hours daily",
-                    station_phone: "(206) 624-6200",
-                    ev_network_web: "https://www.tesla.com/supercharger",
-                    updated_at: new Date().toISOString()
-                }
-            ];
-
-            // Process sample data the same way as real API data
-            allStations = enhancedSampleStations.map(station => ({
-                id: station.id,
-                name: cleanStationName(station.station_name),
-                address: station.street_address,
-                city: station.city,
-                state: station.state,
-                zip: station.zip,
-                latitude: parseFloat(station.latitude),
-                longitude: parseFloat(station.longitude),
-                network: cleanNetworkName(station.ev_network),
-                connectors: parseConnectors(station),
-                access: station.access_code,
-                hours: station.access_days_time,
-                phone: station.station_phone,
-                website: station.ev_network_web,
-                updated: station.updated_at,
-                features: parseFeatures(station)
-            }));
-
-            filteredStations = [...allStations];
-            
-            // Show info message about sample data
-            updateApiStatus('success', 'Sample data loaded (' + allStations.length + ' stations)');
-            
-            console.log('🚀 Loaded ' + allStations.length + ' enhanced sample stations');
-            console.log('💡 This includes stations from CA, TX, FL, NY, WA - ready for production!');
-            
-            // Add note in console about CORS solution
-            console.log('');
-            console.log('🔧 CORS Issue Solutions for Production:');
-            console.log('1. Use Vercel/Netlify serverless functions');
-            console.log('2. Set up your own CORS proxy');
-            console.log('3. Use server-side API calls');
-            console.log('4. Contact NREL about CORS headers');
-        }
-
-        function cleanStationName(name) {
-            if (!name) return 'Unknown Station';
-            return name.replace(/\s+/g, ' ').trim();
-        }
-
-        function cleanNetworkName(network) {
-            if (!network) return 'Independent';
-            
-            const networkMap = {
-                'Tesla Destination': 'Tesla',
-                'Tesla Supercharger': 'Tesla Supercharger',
-                'ChargePoint Network': 'ChargePoint',
-                'Electrify America': 'Electrify America',
-                'EVgo Network': 'EVgo',
-                'Blink Network': 'Blink',
-                'SHELL_RECHARGE': 'Shell Recharge',
-                'Volta': 'Volta'
+        async function loadStations() {
+            const stationContainer = document.getElementById('station-container');
+            const statsElements = {
+                total: document.querySelector('.stat-total'),
+                networks: document.querySelector('.stat-networks'), 
+                states: document.querySelector('.stat-states'),
+                fastChargers: document.querySelector('.stat-fast-chargers')
             };
             
-            return networkMap[network] || network;
-        }
-
-        function parseConnectors(station) {
-            const connectors = [];
-            
-            if (station.ev_level1_evse_num > 0) {
-                connectors.push({
-                    type: 'Level 1',
-                    count: station.ev_level1_evse_num,
-                    power: '1.4 kW'
+            try {
+                console.log('Loading stations from Netlify function...');
+                stationContainer.innerHTML = '<div class="loading">Loading charging stations from NREL database...</div>';
+                
+                // Fetch from your Netlify function
+                const response = await fetch('/.netlify/functions/stations', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
-            }
-            
-            if (station.ev_level2_evse_num > 0) {
-                connectors.push({
-                    type: 'Level 2',
-                    count: station.ev_level2_evse_num,
-                    power: '7-22 kW'
-                });
-            }
-            
-            if (station.ev_dc_fast_num > 0) {
-                connectors.push({
-                    type: 'DC Fast',
-                    count: station.ev_dc_fast_num,
-                    power: '50+ kW'
-                });
-            }
-            
-            return connectors;
-        }
-
-        function parseFeatures(station) {
-            const features = [];
-            
-            if (station.access_code === 'public') features.push('Public Access');
-            if (station.access_days_time && station.access_days_time.includes('24')) features.push('24/7 Access');
-            if (station.groups_with_access_code && station.groups_with_access_code.includes('Private')) features.push('Private');
-            if (station.restricted_access) features.push('Restricted Access');
-            
-            return features;
-        }
-
-        function setupEventListeners() {
-            // Search functionality
-            const searchBox = document.getElementById('searchBox');
-            let searchTimeout;
-            
-            searchBox.addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    currentFilters.search = e.target.value.toLowerCase();
-                    currentPage = 1;
-                    applyFilters();
-                    trackEvent('search', { 'search_term': e.target.value });
-                }, 300);
-            });
-
-            // Filter event listeners
-            setupFilterListeners('stateFilters', 'state');
-            setupFilterListeners('networkFilters', 'network');
-            setupFilterListeners('chargerFilters', 'charger');
-        }
-
-        function setupFilterListeners(containerId, filterType) {
-            const container = document.getElementById(containerId);
-            container.addEventListener('click', (e) => {
-                if (e.target.classList.contains('filter-tag')) {
-                    // Remove active from all tags in this container
-                    container.querySelectorAll('.filter-tag').forEach(tag => {
-                        tag.classList.remove('active');
-                    });
-                    
-                    e.target.classList.add('active');
-                    currentFilters[filterType] = e.target.dataset.filter;
-                    currentPage = 1;
-                    applyFilters();
-                    
-                    trackEvent('filter_applied', {
-                        'filter_type': filterType,
-                        'filter_value': e.target.dataset.filter
-                    });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to fetch stations');
+                }
+                
+                allStations = data.stations || [];
+                filteredStations = [...allStations];
+                
+                console.log(`Loaded ${allStations.length} stations successfully`);
+                
+                // Update stats
+                updateStats(allStations, statsElements);
+                
+                // Display stations
+                displayStations();
+                
+                // Set up filters
+                setupFilters();
+                
+            } catch (error) {
+                console.error('Error loading stations:', error);
+                stationContainer.innerHTML = `
+                    <div class="error-message">
+                        <h3>⚠️ Error Loading Stations</h3>
+                        <p>Failed to load charging stations: ${error.message}</p>
+                        <p>Please try refreshing the page. If the problem persists, the NREL API may be temporarily unavailable.</p>
+                        <button onclick="loadStations()" class="retry-btn">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats(stations, statsElements) {
+            // Calculate statistics
+            const totalStations = stations.length;
+            const uniqueNetworks = new Set(stations.map(s => s.ev_network).filter(n => n)).size;
+            const uniqueStates = new Set(stations.map(s => s.state).filter(s => s)).size;
+            const fastChargers = stations.filter(s => 
+                s.ev_dc_fast_num && parseInt(s.ev_dc_fast_num) > 0
+            ).length;
+            
+            // Update DOM with animation
+            animateCounter(statsElements.total, totalStations);
+            animateCounter(statsElements.networks, uniqueNetworks);
+            animateCounter(statsElements.states, uniqueStates);
+            animateCounter(statsElements.fastChargers, fastChargers);
+            
+            // Update sublabels
+            document.querySelector('.stat-total').nextElementSibling.nextElementSibling.textContent = 'Real-time data';
+            document.querySelector('.stat-networks').nextElementSibling.nextElementSibling.textContent = 'Major providers';
+            document.querySelector('.stat-states').nextElementSibling.nextElementSibling.textContent = 'Nationwide coverage';
+        }
+
+        function animateCounter(element, targetValue) {
+            if (!element) return;
+            
+            let currentValue = 0;
+            const increment = Math.ceil(targetValue / 50);
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= targetValue) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                }
+                element.textContent = currentValue.toLocaleString();
+            }, 30);
+        }
+
+        function displayStations() {
+            const stationContainer = document.getElementById('station-container');
+            const startIndex = (currentPage - 1) * stationsPerPage;
+            const endIndex = startIndex + stationsPerPage;
+            const stationsToShow = filteredStations.slice(startIndex, endIndex);
+            
+            if (stationsToShow.length === 0) {
+                stationContainer.innerHTML = '<div class="no-results">No charging stations found matching your criteria.</div>';
+                return;
+            }
+            
+            const stationsHTML = stationsToShow.map(station => `
+                <div class="station-card">
+                    <div class="station-header">
+                        <h3>${station.station_name || 'Unknown Station'}</h3>
+                        <div class="network-badge">${station.ev_network || 'Independent'}</div>
+                    </div>
+                    <div class="station-info">
+                        <p class="address">📍 ${station.street_address}, ${station.city}, ${station.state} ${station.zip}</p>
+                        <div class="station-details">
+                            <span class="detail-item">⚡ ${station.ev_level1_evse_num || 0} Level 1</span>
+                            <span class="detail-item">🔌 ${station.ev_level2_evse_num || 0} Level 2</span>
+                            <span class="detail-item">⚡ ${station.ev_dc_fast_num || 0} DC Fast</span>
+                        </div>
+                        <div class="station-meta">
+                            <span class="access-code">${station.access_code === 'public' ? '🟢 Public' : '🟡 ' + (station.access_code || 'Unknown')}</span>
+                            <span class="status">${station.status_code === 'E' ? '✅ Available' : '❓ Check Status'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            stationContainer.innerHTML = stationsHTML + getPaginationHTML();
+        }
+
+        function getPaginationHTML() {
+            const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
+            if (totalPages <= 1) return '';
+            
+            const prevDisabled = currentPage === 1 ? 'disabled' : '';
+            const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+            
+            return `
+                <div class="pagination">
+                    <button onclick="changePage(${currentPage - 1})" ${prevDisabled}>Previous</button>
+                    <span>Page ${currentPage} of ${totalPages} (${filteredStations.length.toLocaleString()} stations)</span>
+                    <button onclick="changePage(${currentPage + 1})" ${nextDisabled}>Next</button>
+                </div>
+            `;
+        }
+
+        function changePage(newPage) {
+            const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayStations();
+                document.getElementById('station-container').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function setupFilters() {
+            const stateFilter = document.getElementById('state-filter');
+            const networkFilter = document.getElementById('network-filter');
+            const chargerFilter = document.getElementById('charger-filter');
+            
+            // Populate state filter
+            const states = [...new Set(allStations.map(s => s.state).filter(s => s))].sort();
+            stateFilter.innerHTML = '<option value="">All States</option>' + 
+                states.map(state => `<option value="${state}">${state}</option>`).join('');
+            
+            // Populate network filter
+            const networks = [...new Set(allStations.map(s => s.ev_network).filter(n => n))].sort();
+            networkFilter.innerHTML = '<option value="">All Networks</option>' + 
+                networks.map(network => `<option value="${network}">${network}</option>`).join('');
+            
+            // Add event listeners
+            [stateFilter, networkFilter, chargerFilter].forEach(filter => {
+                filter.addEventListener('change', applyFilters);
             });
+            
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilters);
+            }
         }
 
         function applyFilters() {
+            const stateFilter = document.getElementById('state-filter').value;
+            const networkFilter = document.getElementById('network-filter').value;
+            const chargerFilter = document.getElementById('charger-filter').value;
+            const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+            
             filteredStations = allStations.filter(station => {
-                // State filter
-                if (currentFilters.state !== 'all' && station.state !== currentFilters.state) {
-                    return false;
+                const matchesState = !stateFilter || station.state === stateFilter;
+                const matchesNetwork = !networkFilter || station.ev_network === networkFilter;
+                const matchesChargerType = !chargerFilter || 
+                    (chargerFilter === 'level1' && parseInt(station.ev_level1_evse_num) > 0) ||
+                    (chargerFilter === 'level2' && parseInt(station.ev_level2_evse_num) > 0) ||
+                    (chargerFilter === 'dcfast' && parseInt(station.ev_dc_fast_num) > 0);
+                const matchesSearch = !searchTerm || 
+                    station.station_name?.toLowerCase().includes(searchTerm) ||
+                    station.city?.toLowerCase().includes(searchTerm) ||
+                    station.street_address?.toLowerCase().includes(searchTerm);
+                    
+                return matchesState && matchesNetwork && matchesChargerType && matchesSearch;
+            });
+            
+            currentPage = 1;
+            displayStations();
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
-                
-                // Network filter
-                if (currentFilters.network !== 'all' && station.network !== currentFilters.network) {
-                    return false;
-                }
-                
-                // Charger type filter
-                if (currentFilters.charger !== 'all') {
-                    const hasChargerType = station.connectors.some(connector => {
-                        switch (currentFilters.charger) {
-                            case 'dc_fast': return connector.type === 'DC Fast';
-                            case 'level2': return connector.type === 'Level 2';
-                            case 'level1': return connector.type === 'Level 1';
-                            default: return true;
+            });
+        });
+
+        // Performance tracking for analytics
+        function trackEvent(eventName, properties = {}) {
+            // Google Analytics tracking (uncomment when GA is set up)
+            // if (typeof gtag !== 'undefined') {
+            //     gtag('event', eventName, properties);
+            // }
+            console.log('Event tracked:', eventName, properties);
+        }
+
+        // Track user interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Track search usage
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(function() {
+                    if (this.value.length > 2) {
+                        trackEvent('search_used', { query_length: this.value.length });
+                    }
+                }, 1000));
+            }
+
+            // Track filter usage
+            ['state-filter', 'network-filter', 'charger-filter'].forEach(filterId => {
+                const filter = document.getElementById(filterId);
+                if (filter) {
+                    filter.addEventListener('change', function() {
+                        if (this.value) {
+                            trackEvent('filter_used', { filter_type: filterId, value: this.value });
                         }
                     });
-                    if (!hasChargerType) return false;
-                }
-                
-                // Search filter
-                if (currentFilters.search) {
-                    const searchTerm = currentFilters.search;
-                    return (
-                        station.name.toLowerCase().includes(searchTerm) ||
-                        station.city.toLowerCase().includes(searchTerm) ||
-                        station.state.toLowerCase().includes(searchTerm) ||
-                        station.zip.includes(searchTerm) ||
-                        station.network.toLowerCase().includes(searchTerm)
-                    );
-                }
-                
-                return true;
-            });
-
-            renderStations();
-            updatePagination();
-        }
-
-        function renderStations() {
-            const grid = document.getElementById('stationsGrid');
-            const noResults = document.getElementById('noResults');
-            const pagination = document.getElementById('pagination');
-            
-            if (filteredStations.length === 0) {
-                grid.style.display = 'none';
-                noResults.style.display = 'block';
-                pagination.style.display = 'none';
-                return;
-            }
-
-            grid.style.display = 'grid';
-            noResults.style.display = 'none';
-            pagination.style.display = 'flex';
-
-            // Calculate pagination
-            const startIndex = (currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
-            const endIndex = startIndex + CONFIG.ITEMS_PER_PAGE;
-            const stationsToShow = filteredStations.slice(startIndex, endIndex);
-
-            grid.innerHTML = stationsToShow.map(station => createStationCard(station)).join('');
-            
-            // Lazy load images and animations
-            setTimeout(() => {
-                grid.querySelectorAll('.lazy-load').forEach(el => {
-                    el.classList.add('loaded');
-                });
-            }, 100);
-        }
-
-        function createStationCard(station) {
-            const connectorsHTML = station.connectors.map(connector => 
-                '<div class="detail-item">' +
-                    '<span class="detail-icon">🔌</span>' +
-                    '<span>' + connector.count + 'x ' + connector.type + ' (' + connector.power + ')</span>' +
-                '</div>'
-            ).join('');
-
-            const featuresHTML = station.features.length > 0 ? 
-                '<div class="station-features">' +
-                    station.features.map(feature => '<span class="feature-tag">' + feature + '</span>').join('') +
-                '</div>' : '';
-
-            return '<article class="station-card lazy-load" itemscope itemtype="https://schema.org/ElectricVehicleChargingStation">' +
-                '<header class="station-header">' +
-                    '<h2 class="station-name" itemprop="name">' + station.name + '</h2>' +
-                    '<div class="station-address" itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">' +
-                        '<span>📍</span>' +
-                        '<span itemprop="streetAddress">' + station.address + '</span>, ' +
-                        '<span itemprop="addressLocality">' + station.city + '</span>, ' +
-                        '<span itemprop="addressRegion">' + station.state + '</span> ' +
-                        '<span itemprop="postalCode">' + station.zip + '</span>' +
-                    '</div>' +
-                '</header>' +
-                '<div class="station-content">' +
-                    '<div class="station-details">' +
-                        '<div class="detail-item">' +
-                            '<span class="detail-icon">🏢</span>' +
-                            '<span itemprop="provider">' + station.network + '</span>' +
-                        '</div>' +
-                        connectorsHTML +
-                        (station.phone ? 
-                        '<div class="detail-item">' +
-                            '<span class="detail-icon">📞</span>' +
-                            '<span itemprop="telephone">' + station.phone + '</span>' +
-                        '</div>' : '') +
-                        (station.hours ? 
-                        '<div class="detail-item">' +
-                            '<span class="detail-icon">🕒</span>' +
-                            '<span itemprop="openingHours">' + station.hours + '</span>' +
-                        '</div>' : '') +
-                    '</div>' +
-                    featuresHTML +
-                    '<div class="station-actions">' +
-                        '<button class="action-btn btn-directions" onclick="getDirections(' + station.latitude + ', ' + station.longitude + ', \'' + encodeURIComponent(station.name) + '\')">' +
-                            '🧭 Directions' +
-                        '</button>' +
-                        (station.website ? 
-                        '<button class="action-btn btn-website" onclick="visitWebsite(\'' + station.website + '\', \'' + station.network + '\')">' +
-                            '🌐 Website' +
-                        '</button>' : '') +
-                    '</div>' +
-                '</div>' +
-                '<meta itemprop="latitude" content="' + station.latitude + '">' +
-                '<meta itemprop="longitude" content="' + station.longitude + '">' +
-            '</article>';
-        }
-
-        function updateStats() {
-            const networks = new Set(allStations.map(s => s.network)).size;
-            const states = new Set(allStations.map(s => s.state)).size;
-            const fastChargers = allStations.filter(s => 
-                s.connectors.some(c => c.type === 'DC Fast')
-            ).length;
-
-            document.getElementById('totalStations').textContent = allStations.length.toLocaleString();
-            document.getElementById('totalNetworks').textContent = networks;
-            document.getElementById('totalStates').textContent = states;
-            document.getElementById('fastChargers').textContent = fastChargers.toLocaleString();
-
-            const now = new Date().toLocaleString();
-            document.getElementById('lastUpdatedStations').textContent = 'Updated ' + now;
-            document.getElementById('lastUpdatedNetworks').textContent = 'Updated ' + now;
-            document.getElementById('lastUpdatedStates').textContent = 'Updated ' + now;
-        }
-
-        function populateFilters() {
-            // Populate state filters
-            const states = [...new Set(allStations.map(s => s.state))].sort();
-            const stateContainer = document.getElementById('stateFilters');
-            states.forEach(state => {
-                const tag = document.createElement('div');
-                tag.className = 'filter-tag';
-                tag.dataset.filter = state;
-                tag.textContent = state;
-                stateContainer.appendChild(tag);
-            });
-
-            // Populate network filters
-            const networks = [...new Set(allStations.map(s => s.network))].sort();
-            const networkContainer = document.getElementById('networkFilters');
-            networks.forEach(network => {
-                if (network && network !== 'Independent') {
-                    const tag = document.createElement('div');
-                    tag.className = 'filter-tag';
-                    tag.dataset.filter = network;
-                    tag.textContent = network;
-                    networkContainer.appendChild(tag);
                 }
             });
+        });
+
+        // Debounce function for search
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
         }
 
-        function updatePagination() {
-            const totalPages = Math.ceil(filteredStations.length / CONFIG.ITEMS_PER_PAGE);
-            
-            document.getElementById('pageInfo').textContent = 
-                'Page ' + currentPage + ' of ' + totalPages + ' (' + filteredStations.length + ' stations)';
-            
-            document.getElementById('prevBtn').disabled = currentPage <= 1;
-            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
-        }
+        // Error reporting
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript error:', e.error);
+            // Could send to error tracking service here
+        });
 
-        function changePage(direction) {
-            const totalPages = Math.ceil(filteredStations.length / CONFIG.ITEMS_PER_PAGE);
-            
-            currentPage += direction;
-            currentPage = Math.max(1, Math.min(currentPage, totalPages));
-            
-            renderStations();
-            updatePagination();
-            
-            // Scroll to top of results
-            document.getElementById('stationsGrid').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
+        // Service Worker for offline functionality (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Uncomment to enable service worker
+                // navigator.serviceWorker.register('/sw.js')
+                //     .then(function(registration) {
+                //         console.log('SW registered: ', registration);
+                //     })
+                //     .catch(function(registrationError) {
+                //         console.log('SW registration failed: ', registrationError);
+                //     });
             });
-            
-            trackEvent('page_change', { 'page': currentPage });
-        }
-
-        function updateApiStatus(status, message) {
-            const statusEl = document.getElementById('apiStatus');
-            statusEl.className = 'api-status ' + status;
-            
-            let icon = '';
-            switch (status) {
-                case 'loading': icon = '<span class="spinner"></span>'; break;
-                case 'success': icon = '✅'; break;
-                case 'error': icon = '❌'; break;
-            }
-            
-            statusEl.innerHTML = icon + '<span>' + message + '</span>';
-            
-            // Hide status after success
-            if (status === 'success') {
-                setTimeout(() => {
-                    statusEl.style.opacity = '0';
-                    setTimeout(() => statusEl.style.display = 'none', 300);
-                }, 3000);
-            }
-        }
-
-        function findNearbyStations() {
-            const btn = document.getElementById('locationBtn');
-            
-            if (!navigator.geolocation) {
-                alert('Geolocation is not supported by this browser.');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Finding...';
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    userLocation = {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    };
-                    
-                    // Sort stations by distance
-                    const stationsWithDistance = allStations.map(station => ({
-                        ...station,
-                        distance: calculateDistance(
-                            userLocation.latitude, 
-                            userLocation.longitude,
-                            station.latitude, 
-                            station.longitude
-                        )
-                    })).sort((a, b) => a.distance - b.distance);
-
-                    // Show nearest stations
-                    filteredStations = stationsWithDistance.slice(0, 50);
-                    currentPage = 1;
-                    renderStations();
-                    updatePagination();
-                    
-                    btn.disabled = false;
-                    btn.innerHTML = '📍 Found ' + filteredStations.length;
-                    
-                    trackEvent('location_search', {
-                        'latitude': userLocation.latitude,
-                        'longitude': userLocation.longitude,
-                        'results_count': filteredStations.length
-                    });
-                    
-                    // Reset button after 3 seconds
-                    setTimeout(() => {
-                        btn.innerHTML = '📍 Find Near Me';
-                    }, 3000);
-                },
-                (error) => {
-                    btn.disabled = false;
-                    btn.innerHTML = '📍 Find Near Me';
-                    alert('Unable to access your location. Please enable location services.');
-                    
-                    trackEvent('location_error', { 'error': error.message });
-                }
-            );
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 3959; // Earth's radius in miles
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
-        function getDirections(lat, lng, name) {
-            const encodedName = encodeURIComponent(name);
-            const mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng + '&destination_name=' + encodedName;
-            window.open(mapsUrl, '_blank', 'noopener,noreferrer');
-            
-            trackEvent('directions_clicked', {
-                'station_name': name,
-                'latitude': lat,
-                'longitude': lng
-            });
-        }
-
-        function visitWebsite(url, network) {
-            if (url && url.startsWith('http')) {
-                window.open(url, '_blank', 'noopener,noreferrer');
-                
-                trackEvent('website_visited', {
-                    'network': network,
-                    'url': url
-                });
-            }
-        }
-
-        function showError(message) {
-            const grid = document.getElementById('stationsGrid');
-            grid.innerHTML = '<div class="loading" style="color: #e74c3c;">' +
-                '<span>⚠️ ' + message + '</span>' +
-            '</div>';
-        }
-
-        // SEO and Performance optimizations
-        function generateSitemap() {
-            // This would be implemented server-side in production
-            console.log('Sitemap generation would run server-side');
-        }
-
-        // Analytics event tracking
-        function trackEvent(eventName, parameters) {
-            if (typeof gtag !== 'undefined') {
-                gtag('event', eventName, parameters);
-            }
-            
-            // Also log to console for debugging
-            console.log('📊 Analytics Event:', eventName, parameters);
-        }
-
-        // Service Worker registration for caching (disabled in Claude environment)
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator && window.location.hostname !== 'www.claudeusercontent.com') {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js')
-                        .then((registration) => {
-                            console.log('SW registered: ', registration);
-                        })
-                        .catch((registrationError) => {
-                            console.log('SW registration failed: ', registrationError);
-                        });
-                });
-            } else {
-                console.log('🚀 Service Worker will be enabled in production environment');
-            }
-        }
-
-        // Call service worker registration
-        registerServiceWorker();
-
-        // Auto-refresh data daily (disabled in demo)
-        function setupAutoRefresh() {
-            if (window.location.hostname !== 'www.claudeusercontent.com') {
-                setInterval(() => {
-                    localStorage.removeItem('nrel_stations_cache');
-                    localStorage.removeItem('nrel_cache_time');
-                    location.reload();
-                }, 24 * 60 * 60 * 1000); // 24 hours
-            } else {
-                console.log('🚀 Auto-refresh will be enabled in production environment');
-            }
-        }
-
-        // Call auto-refresh setup
-        setupAutoRefresh();
-
-        // Handle search params for deep linking
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('state')) {
-            currentFilters.state = urlParams.get('state');
-        }
-        if (urlParams.get('search')) {
-            currentFilters.search = urlParams.get('search');
-            document.getElementById('searchBox').value = currentFilters.search;
         }
     </script>
 
-    <!-- Service Worker for offline caching -->
-    <script>
-        // Service worker content (would be in separate sw.js file)
-        const SW_CONTENT = `
-        const CACHE_NAME = 'ev-chargemap-v1';
-        const urlsToCache = [
-            '/',
-            '/styles.css',
-            '/script.js'
-        ];
-
-        self.addEventListener('install', (event) => {
-            event.waitUntil(
-                caches.open(CACHE_NAME)
-                    .then((cache) => cache.addAll(urlsToCache))
-            );
-        });
-
-        self.addEventListener('fetch', (event) => {
-            event.respondWith(
-                caches.match(event.request)
-                    .then((response) => {
-                        return response || fetch(event.request);
-                    }
-                )
-            );
-        });
-        `;
+    <!-- Schema.org structured data for better SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": "Electric Vehicle Charging Stations",
+        "description": "Comprehensive database of electric vehicle charging stations across the United States",
+        "creator": {
+            "@type": "Organization",
+            "name": "National Renewable Energy Laboratory",
+            "url": "https://www.nrel.gov/"
+        },
+        "distributionContent": "Real-time charging station data including location, network, and charger specifications",
+        "spatialCoverage": {
+            "@type": "Place",
+            "geo": {
+                "@type": "GeoShape",
+                "box": "49.3457868 -95.15314 24.7433195 -66.94888"
+            },
+            "name": "United States"
+        },
+        "temporalCoverage": "2025",
+        "keywords": [
+            "electric vehicle",
+            "charging stations",
+            "EV infrastructure",
+            "renewable energy",
+            "transportation"
+        ]
+    }
     </script>
-
-    <!-- Google Search Console verification -->
-    <meta name="google-site-verification" content="YOUR_GSC_VERIFICATION_CODE">
-    
-    <!-- Bing Webmaster Tools verification -->
-    <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE">
 </body>
 </html>
+                

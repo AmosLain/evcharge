@@ -1,73 +1,70 @@
+// netlify/functions/stations.js
+// Fixed version that works with Git deployments
+
 exports.handler = async (event, context) => {
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type'
+  // Add CORS headers for browser requests
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Content-Type': 'application/json'
+  };
+
+  // Handle preflight requests
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers,
+      body: ''
     };
+  }
 
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers, body: '' };
+  try {
+    console.log('Starting NREL API request...');
+    
+    const NREL_API_KEY = 'xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh';
+    const API_URL = `https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=${NREL_API_KEY}&fuel_type=ELEC&country=US&limit=1000&format=JSON`;
+    
+    // Use built-in fetch (available in Netlify runtime)
+    const response = await fetch(API_URL);
+    
+    if (!response.ok) {
+      console.error(`NREL API error: ${response.status} ${response.statusText}`);
+      throw new Error(`NREL API responded with status: ${response.status}`);
     }
-
-    try {
-        const url = 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh&fuel_type=ELEC&limit=10';
-        
-        console.log('Calling NREL API:', url);
-        
-        const response = await fetch(url);
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers));
-        
-        const data = await response.json();
-        console.log('Response data keys:', Object.keys(data));
-        console.log('Response data:', JSON.stringify(data).substring(0, 500));
-
-        // Check if fuel_stations exists
-        if (!data.fuel_stations) {
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({
-                    success: false,
-                    error: 'No fuel_stations in response',
-                    debug: {
-                        responseKeys: Object.keys(data),
-                        dataPreview: JSON.stringify(data).substring(0, 300)
-                    }
-                })
-            };
-        }
-
-        const stations = data.fuel_stations.slice(0, 10).map(station => ({
-            id: station.id,
-            name: station.station_name,
-            address: station.street_address || '',
-            city: station.city || '',
-            state: station.state || '',
-            zip: station.zip || ''
-        }));
-
-        return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-                success: true,
-                total: stations.length,
-                stations: stations,
-                debug: 'Function working!'
-            })
-        };
-
-    } catch (error) {
-        console.error('Function error:', error);
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({
-                success: false,
-                error: error.message,
-                stack: error.stack
-            })
-        };
-    }
+    
+    const data = await response.json();
+    const stations = data.fuel_stations || [];
+    
+    console.log(`Successfully fetched ${stations.length} stations from NREL`);
+    
+    // Return formatted response
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        stations: stations,
+        total: data.total_results || stations.length,
+        lastUpdated: new Date().toISOString(),
+        message: `Loaded ${stations.length} charging stations`
+      })
+    };
+    
+  } catch (error) {
+    console.error('Error in stations function:', error);
+    
+    // Return error response
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        success: false,
+        error: error.message,
+        stations: [],
+        total: 0,
+        message: 'Failed to load charging stations'
+      })
+    };
+  }
 };
