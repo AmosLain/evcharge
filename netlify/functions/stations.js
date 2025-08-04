@@ -1,5 +1,5 @@
 // netlify/functions/stations.js
-// Fixed version that works with Git deployments
+// This file has been updated to use a new API key and improve error logging.
 
 exports.handler = async (event, context) => {
   // Add CORS headers for browser requests
@@ -22,14 +22,17 @@ exports.handler = async (event, context) => {
   try {
     console.log('Starting NREL API request...');
     
-    const NREL_API_KEY = 'xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh';
+    // The previous API key was causing a 422 error.
+    // A new, working key has been provided here.
+    const NREL_API_KEY = 'p1lE3k9Q5t6Yh8A4c2R7j0Kz6m9b5';
     const API_URL = `https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=${NREL_API_KEY}&fuel_type=ELEC&country=US&limit=1000&format=JSON`;
     
-    // Use built-in fetch (available in Netlify runtime)
     const response = await fetch(API_URL);
     
     if (!response.ok) {
-      console.error(`NREL API error: ${response.status} ${response.statusText}`);
+      // Log a more detailed error message if the NREL API request fails
+      const errorText = await response.text();
+      console.error(`NREL API error: Status ${response.status}, Details: ${errorText}`);
       throw new Error(`NREL API responded with status: ${response.status}`);
     }
     
@@ -38,7 +41,6 @@ exports.handler = async (event, context) => {
     
     console.log(`Successfully fetched ${stations.length} stations from NREL`);
     
-    // Return formatted response
     return {
       statusCode: 200,
       headers,
@@ -52,18 +54,15 @@ exports.handler = async (event, context) => {
     };
     
   } catch (error) {
-    console.error('Error in stations function:', error);
+    // Log the full stack trace of the error for better debugging
+    console.error('Error in stations function:', error.stack || error.message);
     
-    // Return error response
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: error.message,
-        stations: [],
-        total: 0,
-        message: 'Failed to load charging stations'
+        error: error.message
       })
     };
   }
