@@ -9,25 +9,27 @@ exports.handler = async (event, context) => {
         return { statusCode: 200, headers, body: '' };
     }
 
+    if (event.httpMethod !== 'GET') {
+        return {
+            statusCode: 405,
+            headers,
+            body: JSON.stringify({ error: 'Method not allowed' })
+        };
+    }
+
     try {
-        // Use the EXACT same URL that worked in your browser
         const url = 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh&fuel_type=ELEC&limit=1000';
         
         const response = await fetch(url);
         
         if (!response.ok) {
-            throw new Error(`NREL API error: ${response.status} ${response.statusText}`);
+            throw new Error(`NREL API error: ${response.status}`);
         }
 
         const data = await response.json();
 
-        // Process the stations exactly like the successful API response
         const processedStations = data.fuel_stations
-            .filter(station => 
-                station.latitude && 
-                station.longitude && 
-                station.station_name
-            )
+            .filter(station => station.latitude && station.longitude && station.station_name)
             .map(station => ({
                 id: station.id,
                 name: station.station_name,
@@ -46,3 +48,26 @@ exports.handler = async (event, context) => {
                 level2_ports: station.ev_level2_evse_num || 0,
                 dc_fast_ports: station.ev_dc_fast_num || 0,
                 updated: station.updated_at
+            }));
+
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                total: processedStations.length,
+                stations: processedStations
+            })
+        };
+
+    } catch (error) {
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                success: false,
+                error: error.message
+            })
+        };
+    }
+};
