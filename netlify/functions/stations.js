@@ -31,7 +31,15 @@ exports.handler = async (event, context) => {
     
     if (!response.ok) {
       // Log a more detailed error message if the NREL API request fails
-      const errorText = await response.text();
+      let errorText = '';
+      try {
+        // Attempt to get a JSON body if available
+        const errorData = await response.json();
+        errorText = JSON.stringify(errorData);
+      } catch (e) {
+        // Fallback to plain text if JSON parsing fails
+        errorText = await response.text();
+      }
       console.error(`NREL API error: Status ${response.status}, Details: ${errorText}`);
       throw new Error(`NREL API responded with status: ${response.status}`);
     }
