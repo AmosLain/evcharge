@@ -10,29 +10,41 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const url = 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh&fuel_type=ELEC&limit=1000';
+        const url = 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=xwB0h4XAfDn0gDrtGYda9YheLlZBPFLsN7Pi8njh&fuel_type=ELEC&limit=10';
+        
+        console.log('Calling NREL API:', url);
         
         const response = await fetch(url);
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers));
+        
         const data = await response.json();
+        console.log('Response data keys:', Object.keys(data));
+        console.log('Response data:', JSON.stringify(data).substring(0, 500));
 
-        const stations = data.fuel_stations.map(station => ({
+        // Check if fuel_stations exists
+        if (!data.fuel_stations) {
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'No fuel_stations in response',
+                    debug: {
+                        responseKeys: Object.keys(data),
+                        dataPreview: JSON.stringify(data).substring(0, 300)
+                    }
+                })
+            };
+        }
+
+        const stations = data.fuel_stations.slice(0, 10).map(station => ({
             id: station.id,
             name: station.station_name,
             address: station.street_address || '',
             city: station.city || '',
             state: station.state || '',
-            zip: station.zip || '',
-            latitude: parseFloat(station.latitude),
-            longitude: parseFloat(station.longitude),
-            network: station.ev_network || 'Non-Networked',
-            phone: station.station_phone || '',
-            website: station.ev_network_web || '',
-            hours: station.access_days_time || '',
-            access: station.access_code || 'unknown',
-            level1_ports: station.ev_level1_evse_num || 0,
-            level2_ports: station.ev_level2_evse_num || 0,
-            dc_fast_ports: station.ev_dc_fast_num || 0,
-            updated: station.updated_at
+            zip: station.zip || ''
         }));
 
         return {
@@ -41,17 +53,20 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 success: true,
                 total: stations.length,
-                stations: stations
+                stations: stations,
+                debug: 'Function working!'
             })
         };
 
     } catch (error) {
+        console.error('Function error:', error);
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
                 success: false,
-                error: error.message
+                error: error.message,
+                stack: error.stack
             })
         };
     }
